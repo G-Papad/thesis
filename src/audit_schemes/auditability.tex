@@ -1,0 +1,26 @@
+% \section{Auditability in Private Payment Systems}
+
+Auditability plays a pivotal role in ensuring the integrity, transparency, and regulatory compliance of payment systems. 
+In financial transactions, where trust and security are paramount, regulatory functions serve as critical safeguards to protect against fraud, money laundering, and other illicit activities.
+These regulatory functions that appear in the literature can be categorized in transaction and user level.\\
+On the transaction level regulatory functions can include data such as: 
+\emph{value limits} (e.g. a threshold in the transfer amount), 
+\emph{tracing tags}, that provide links between transactions,
+\emph{revealing the transaction value and/or participants},
+\emph{tax rate}, deducting a transaction's value portion towards a pre-determined account.\\
+On the user level regulatory functions can include:
+\emph{information of user's sum of values} (e.g. total amount of funds received/spent in a specific period of time),
+\emph{user revocation}, meaning that specific policies are applied only to users in a "blacklist",
+\emph{deriving statistical information} (e.g. learning th average transacted value in a time from user's past transactions),
+\emph{revoking a non compliant user's anonymity}.
+
+There are two approaches in order these regulation to be enforced, \emph{auditability} and \emph{accountability}.
+On the one hand, auditability refers to a protocol where an external auditor can learn the requested information through the data that are stored on the blockchain.
+This protocol could be either interactive with the users, meaning their consent is required, or non-interactive.
+On the other hand, accountability refers to recurrently execution of policies by system fucntionalities when certain predicate is satisfies.
+In other words, transactions that does not comply with system's policies will never be verified and stored in the blockchain.
+Therefore, there is no need of active participation of an external auditor, since the policies are enforced during the verification phase of the transaction. 
+
+Afterwards, an overview of existing distributed payment systems which combines both privacy and auditability is presented.
+Following the structure of \cite{SokAuditability} these systems are divided into two categories depending on the power given to the auditors from the disclosed information:
+There are systems that requires a centralized trusted desingated athority to perform the regulation functions and the systems that does not assume any explicit auditor.

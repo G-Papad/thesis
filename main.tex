@@ -1,0 +1,37 @@
+\documentclass[12pt,a4paper]{book}
+\input{src/preamble}
+% \pagestyle{myheadings}
+
+\input{src/macros}
+
+\title{Privacy and Auditability in Decentralized Payment Systems}
+\author{Γεώργιος Παπαδούλης }
+\date{October 2023}
+
+\begin{document}
+    
+    \tableofcontents
+    
+    \chapter{Introduction}
+
+    \chapter{Background}
+        \input{src/background/blockchain.tex}
+        \input{src/background/bitcoin.tex}
+        \input{src/background/privacy.tex}
+        \input{src/background/privateSchemes.tex}
+
+    \chapter{Auditability in Private Payment Systems}
+    \input{src/audit_schemes/auditability.tex}
+    \input{src/audit_schemes/auditSchemes.tex}
+
+    \chapter{Proposed Scheme}
+
+    \chapter{Implementation}
+
+    \chapter{Evaluation}
+
+    \chapter{Conclusion}
+
+    \printbibliography
+
+\end{document}
