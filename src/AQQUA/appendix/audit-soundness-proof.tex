@@ -1,0 +1,27 @@
+% \section{Full proof of audit soundness}
+
+\begin{theorem}
+    AQQUA satisfies audit soundness, as of \autoref{def:audit-soundness}
+\end{theorem}
+\begin{proof}
+    Assume that there exist a PPT $\adv$ that wins the audit soundness game of Game \ref{alg:audit-soundness-game} with non-negligible probability. Using the notation of the game, we have that $\adv$ outputted a proof $\pi = (\pi_1, \pi_2)$ that verifies but $\adv$ is not compliant with the specified policy.
+    
+    % $\adv$ is given a policy $f$ with its auxiliary parameters $\aux$, an initial public key $\inpk$ and two snapshots from the blockchain $\snap_{1}, \snap_{2}$. Then $\adv$ constructs $\pi$ which is a ZK-proof for the relation $R(x,w)$ as defined in \autoref{fig:audit}, with $x = (\inpk, \snap_{1}, \snap_{2}, \{ \numaccs_j, {\comm{\numaccs_{j}}}, \{ {\acct_j}_i \}_{i=1}^{\numaccs_j}\}_{j=1}^{2}, \comm{\v}, \aux)$ and $w=(\sk, \v)$, where $\v, \aux$ are values that depend on the policy.
+    % We have that $\pi$ is a ZK-proof for the relation $R(x,w)$ as defined in \autoref{fig:audit}, with $x = (\inpk, \snap_{1}, \snap_{2}, \{ \numaccs_j, {\comm{\numaccs_{j}}}, \{ {\acct_j}_i \}_{i=1}^{\numaccs_j}\}_{j=1}^{2}, \comm{\v}, \aux)$ and $w=(\sk, \v)$ ($\v, \aux$ depend on the policy).
+
+    $\adv$ choose a policy $f$ with its auxiliary parameters $\aux$, an initial public key $\inpk$ and two snapshots from the blockchain $\snap_{1}, \snap_{2}$. Then $\adv$ constructs $\pi = (\pi_1, \pi_2)$ which as defined in \autoref{fig:audit} is a ZK-proof for the relations $R_1(x,w)$, with $x=(\inpk, \{ \numaccs_j, {\comm{\numaccs_{j}}}, \{ \acct_{ji} \}_{i=1}^{\numaccs_j}\}_{j=1}^{2})$ and $w=(\sk)$ and $R_2(x,w)$, with $x=(\{ \acct_{1i} \}_{i=1}^{\numaccs_j}, \{ \acct_{2i} \}_{i=1}^{\numaccs_j}, \comm{\v}, \aux)$ and $w=(\sk, \v)$, where $\v, \aux$ are values that depend on the policy.
+
+    From the soundness property of the NIZK argument of the $\pi_1$, we can extract a witness $w^* = \sk^*$ such that $R_1(x, w^*)$ = 1. We have that every $\pk \in \{\inpk\} \cup \{\acct_{ji}.\pk\}_{i=1}^{\numaccs_j}$,  $\verkp(\sk^*, \pk)$. Therefore similarly to theft-prevention proof we can prove that if $\sk^* \in \honest$ then $\adv$ can be used to break the unforgeability property of UPK scheme. Else if $\sk^* \in \corrupt$ then since $\adv$ wins the game, we have that the opening to the commitment of $\comm{\numaccs}$ is different from the one that resulting from bookkeeping. This trivially breaks the binding property of the commitment scheme.
+
+    From the soundness property of the NIZK argument of the $\pi_2$, we can extract a witness $w^* = \v^*$ such that $R_1(x, w^*)$ = 1. Again since $\adv$ wince the game the sum of the openings of the commited value of all the accounts that belongs to $\adv$ is different from the one that resulting from bookkeeping, so this breaks the binding property of the commitment scheme.
+    % From the soundness property of the NIZK argument of the $\audit$ algorithm, we can extract a witness $w^* = (\sk^*, \v^*)$ such that $R(x, w^*)$ = 1. 
+
+    % We have that every $\pk \in \{\inpk\} \cup \{\acct_{j_i}.\pk\}_{i=1}^{\numaccs_j}$,  $\verkp(\sk^*, \pk)$. We divide into two cases based on wether $\sk^* \in \honest$ or $\sk^* \in \corrupt$.
+
+    % Similarly to theft-prevention proof:
+    % \begin{itemize}
+    %     \item if $\sk^* \in \honest$ we can prove that $\adv$ can be used in order to break the unforgeability property of UPK scheme.
+    %     \item if $\sk^* \in \corrupt$ we can prove that $\adv$ trivially breaks the binding property of one of the commitments $\comm{\numaccs}$ or $\comm{\v}$.
+    % \end{itemize}
+    
+\end{proof}

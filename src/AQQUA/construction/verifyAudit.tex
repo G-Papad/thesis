@@ -1,0 +1,8 @@
+\subsubsection{Audit Verification}
+
+%The $0/1 \gets \vera(\inpk, \snap_1, \snap_2, ({\comm{\numaccs}}_1, \{ {\acct_1}_{i} \}_{i=1}^\numaccs, {\comm{\numaccs}}_2, \{ {\acct_2}_{i} \}_{i=1}^\numaccs), (f,\aux), \pi)$ algorithm is excecuted by the $\AA$ to check the compliance of the user with a specific policy.
+The $\vera$ algorithm is executed by the $\AA$ to check the compliance of the user with a specific policy.
+Initially, the algorithm checks that the user has revealed $\numaccs$ accounts that belongs to each selected snapshot, calculate the necessary values (i.e. multiplication of committed amounts), and then runs the verification algorithm for the NIZK argument $\pi$ and returns its result.
+
+% //TODO: do we need to mention the below paragraph?
+% If the verification fails then the $\AA$ can remove the corresponding initial public key $\inpk$ of the user from the $\usersset$, and can collaborate with the $\RA$ to potentially penalize the user. 

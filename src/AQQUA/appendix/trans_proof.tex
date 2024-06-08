@@ -1,0 +1,200 @@
+\subsection{zk-proof of transactions}
+In each transaction created from $\trans$ algorithm a prover essentially has to prove that:
+\begin{enumerate}
+    \item accounts in $\outputs$ are proper updates of $\inputs$
+    \item the updates of balances satisfy preservation of value
+    \item balances in accounts of recipients and anonymity set do not decrease
+    \item the sender account in $\outputs$ contain a balance in $\vset$
+    \item the vectors $\vv{\vbl}^\prime, \vv{\vout}^\prime$ have the same values for the sender accounts and $\vv{\vbl}^\prime, \vv{\vin}^\prime$ for the receivers accounts and $(\vv{\vout}^\prime, \vv{\vin}^\prime)$ have zero value for the rest.
+\end{enumerate}
+
+Properties 3,4 can be proved by range proofs and we implement them with Bulletproofs \cite{Bulletproofs}. 
+For the properties 1,2,5 we are doing the following analysis similar to Quisquis\cite{fauzi2019quisquis}.
+
+% Let $\inputs$ have values $\vec{\varbl}, \vec{\varout}, \vec{\varin}$ and $\outputs \text{ } \vec{\varbl}', \vec{\varout}', \vec{\varin}'$. Then $\vv{\vbl}^\prime = \vec{\varbl}' - \vec{\varbl}, \vv{\vout}^\prime = \vec{\varout}' - \vec{\varout}, \vv{\vin}^\prime = \vec{\varin}'- \vec{\varin}$ are the change in values from $\inputs$ to $\outputs$. Furthermore, 
+Let the sender's accounts be $\inputs_1, \dots, \inputs_s$ and the receivers' accounts be $\inputs_{s+1}$, $\dots$, $\inputs_{t}$.
+
+In order to easily verify the validity of the updates, the prover creates accounts $\vec{\acct_{\delta}}$, where ${\acct_{\delta,i}} = (\pk_i, \comm{{\vbl}_i}, \comm{{\vout}_i}, \comm{{\vin}_i})$. Now in order to prove property 5, the prover shows that for $\acct_{\delta, 1}, \dots, \acct_{\delta, s}$ the values under the $\comm{{\vbl}_i}$and $\comm{{\vout}_i}$ are the same. Respectively for the recipients, for $\acct_{\delta, s+1}, \dots, \acct_{\delta, t}$ the values under the $\comm{{\vbl}_i}$and $\comm{{\vin}_i}$ are the same.
+
+Since the sender-prover knows all the values of the $\acct_{\delta}$, they can create commitments for the same values under a different public key $\pk_{\epsilon} = (g,h)$. So the prover creates $\vec{\acct_{\epsilon}}$ where ${\acct_{\epsilon}}_i = ((g,h), \comm{{\vbl}_i}_{\epsilon}, \comm{{\vout}_i}_{\epsilon}, \comm{{\vin}_i}_{\epsilon})$. Then they use the homomorphic property of the commitment in order to prove the preservation of value, since $\sum_i{{\vbl}_i} = 0 \iff \prod_i{\comm{{\vbl}_i}}_{\epsilon}$ is a commitment of 0 under $\pk_{\epsilon} = (g,h)$. The values in $\acct_{\epsilon,s+1}, \dots, \acct_{\epsilon,t}$ will be used to prove that balances of recipients set and anonymity set is not decreased, meaning ${\vbl}_{\epsilon, s+1}, \dots, {\vbl}_{\epsilon, n}  \in \vset$.
+
+Now in order to hide the sender's and the receiver's position in $\inputs$ and $\outputs$ we first shuffle $\inputs$ list to $\inputs'$ before the updates, then we execute the updates to produce $\outputs'$, and finally we shuffle again after the updates to get $\outputs$ in arbitrary order. The first shuffle uses the aforementioned permutation where senders' accounts are first,followed by recipients' accounts and then the anonymity set. The second shuffle uses a permutation in order to order the $\outputs$ lexicographically.
+
+Therefore, we need some auxiliary functions for the proof that are defined as following:
+
+\begin{itemize}
+    \item $\createdelta(\{\acct_i\}_{i=1}^{n}, \{{\vbl}_i\}_{i=1}^{n}, \{{\vout}_i\}_{i=1}^{n}, \{{\vin}_i\}_{i=1}^{n})$: Creates a set of accounts that contains the differences between accounts' variables $\varbl, \varout, \varin$ in the input and output accounts, and another set of accounts that also contains these differences but all with the global public key $(g,h)$:
+    \begin{enumerate}
+        \item Parse $\acct_i = (\pk_i, \com_{\varbl,i}, \com_{\varout,i}, \com_{\varin,i})$. Sample $r_{(\varbl|\varout|\varin),1}, \dots, r_{ (\varbl|\varout|\varin),n-1} \sample \mathbb{F}_p$ and set $r_{(\varbl|\varout|\varin),n} = -\sum_{i=1}^{n-1} r_{(\varbl|\varout|\varin),i}$. 
+        \item Set $\acct_{\delta,i} = (\pk_i, \commit(\pk_i,{\vbl}_i; r_{\varbl,i}), \commit(\pk_i,{\vout}_i; r_{\varout,i}), \commit(\pk_i,{\vin}_i; r_{\varin,i}))$
+        \item Set $\acct_{\epsilon,i} = ((g,h), \commit((g,h),{\vbl}_i; r_{\varbl,i}), \commit((g,h),{\vout}_i; r_{\varout,i}), \commit((g,h),{\vin}_i; r_{\varin,i}))$
+        \item Output $(\{\acct_{\delta,i}\}_{i=1}^n, \{\acct_{\epsilon,i}\}_{i=1}^n, \vec{r_{\varbl}}, \vec{r_{\varout}}, \vec{r_{\varin}})$
+    \end{enumerate}
+    \vspace{0.3cm}
+
+    \item $\verdelta(\{\acct_{\delta,i}\}_{i=1}^{n}, \{\acct_{\epsilon,i}\}_{i=1}^{n}, \vec{\vbl}, \vec{\vout}, \vec{\vin}, \vec{r_{\varbl}}, \vec{r_{\varout}}, \vec{r_{\varin}})$: Verifies that accounts created using $\createdelta$ are consistent:
+    \begin{enumerate}
+        \item Parse $\acct_{\delta,i} = (\pk_i, \comm{{\vbl}_i}, \comm{{\vout}_i}, \comm{{\vin}_i})$ and $\acct_{\epsilon,i} = (\pk_{\epsilon,i}, \com_{\epsilon, i})$
+        \item If $\prod_{i=1}^{n} \com_{\epsilon, i} = (1,1)$ and $\forall i \ \comm{{\vbl}_i} = \commit(\pk_i, {\vbl}_i;r_{\varbl,i}) 
+        \ \land \ \comm{{\vout}_i} = \commit(\pk_i,{\vout}_i;r_{\varout,i}) 
+        \ \land \ \comm{{\vin}_i} = \commit(\pk_i,{\vin}_i;r_{\varin,i}) 
+        \ \land \ \acct_{\epsilon,i} = ((g,h), \commit((g,h),({\vbl}_i;r_{\varbl,i}))$ output 1. Else output 0.
+    \end{enumerate}
+    \vspace{0.3cm}
+
+    \item $\vernonneg(\acct_{\epsilon}, \vbl, r_{\varbl})$: Verifies that an account contains a balances in $\vset$:
+    \begin{enumerate}
+        \item If $\acct_{\epsilon} = ((g,h), (g^r, g^vh^r)) \land v \in \vset$ outputs 1. Else output 0.
+    \end{enumerate}
+    \vspace{0.3cm}
+
+    \item $\upddelta(\{\acct_{i}\}_{i=1}^{n}, \{\acct_{\delta,i}\}_{i=1}^{n})$: Updates the input accounts by ${\vbl}_i,{\vout}_i,{\vin}_i$ but with the public key unchanged:
+    \begin{enumerate}
+        \item Parse $\acct_i = (\pk_i, \com_{\varbl,i}, \com_{\varout,i}, \com_{\varin,i})$ and $\acct_{\delta,i} = (\pk^\prime_{i}, \comm{{\vbl}_i}, \comm{{\vout}_i}, \comm{{\vin}_i})$. 
+        \item If $\pk_i = \pk'_i \ \forall i$ output $\{(\pk_i, \com_{\varbl,i} \cdot \comm{{\vbl}_i}, \com_{\varout,i} \cdot \comm{{\vout}_i}, \com_{\varin,i} \cdot \comm{{\vin}_i})\}$, else output $ \perp$.
+    \end{enumerate}
+    \vspace{0.3cm}
+
+    \item $\verupddelta(\acct, \acct', \acct_{\delta})$: Verifies that $\upddelta$ was performed correctly:
+    \begin{enumerate}
+        \item Parse $\acct = (\pk, \com_{\varbl}, \com_{\varout}, \com_{\varin}), \acct' = (\pk, \com_{\varbl}^\prime, \com_{\varout}^\prime, \com_{\varin}^\prime)$ and $\acct_{\delta} = (\pk_{\delta}, \comm{\vbl}, \comm{\vout}, \comm{\vin})$.
+        \item Check that $\pk = \pk' = \pk_{\delta} 
+        \ \land \ \com_{\varbl}^\prime = \com_{\varbl} \cdot \comm{\vbl} 
+        \ \land \ \com_{\varout}^\prime = \com_{\varout} \cdot \comm{\vout}
+        \ \land \ \com_{\varin}^\prime = \com_{\varin} \cdot \comm{\vin}$.
+    \end{enumerate}
+    \vspace{0.3cm}
+
+    \item $\versenderdelta(\acct_{\delta}, v, r_{\varbl}, r_{\varout})$: Verifies that sender's value $\varout$ is correct.
+    \begin{enumerate}
+        \item Parse $\acct_{\delta} = (\pk_{\delta}, \comm{\vbl}, \comm{\vout}, \comm{\vin})$.
+        \item If $\comm{\vbl} = \commit(\pk_{\delta}, v;r_{\varbl}) \land \comm{\vout} = \commit(\pk_{\delta},v;r_{\varout})$ then return 1. Else return 0.
+    \end{enumerate}
+    \vspace{0.3cm}
+
+    \item $\verrecdelta(\acct_{\delta}, v, r_{\varbl}, r_{\varin})$: Verifies that receiver's value $\varin$ is correct.
+    \begin{enumerate}
+        \item Parse $\acct_{\delta} = (\pk_{\delta}, \comm{\vbl}, \comm{\vout}, \comm{\vin})$.
+        \item If $\comm{\vbl} = \commit(\pk_{\delta}, v;r_{\varbl}) \land \comm{\vin} = \commit(\pk_{\delta}, v;r_{\varin})$ then return 1. Else return 0.
+    \end{enumerate}
+    \vspace{0.3cm}
+
+\end{itemize}
+
+Then the $\nizkprove_{\trans}(x,w)$ performs the following steps:
+\begin{enumerate}
+    \item Parse $x=(\inputs, \outputs), w = (\sk, \{{\varbl}_i, {\varout}_i, {\varin}_i\}_{i \in \isset^*}, \vv{\vbl}^\prime, \vv{\vout}^\prime, \vv{\vin}^\prime, \vv{r}, \psi, \isset^*, \irset^*, \ianset^*)$. If $R(x,w) = 0$ abort;
+    \vspace{0.1cm}
+
+    \item Let $\psi_1$ be a permutation such that $\psi_1(\isset^*) = [1,s], \psi_1(\irset^*) = [s+1,t]$ and $\psi_1(\ianset^*) = [t+1, n]$;
+    % \vspace{0.1cm}
+
+    % \item Sample ${\tau}_1 \sample \mathbb{F}_p, \rho_{1,\varbl} \sample \mathbb{F}_p, \rho_{1,\varout} \sample \mathbb{F}_p, \rho_{1,\varin} \sample \mathbb{F}_p$;
+    % \vspace{0.1cm}
+    \item Sample $\rho_1, \rho_2, \rho_3, \rho_4 \sample \mathbb{F}_p$ and let $\vec{\rho} = (\rho_1, \rho_2, \rho_3, \rho_4)$;
+    \vspace{0.1cm}
+
+    \item Set $\inputs^\prime = \updacc(\{\inputs_{\psi_{1}(i)},0,0,0\}_i; \vec{\rho})$;
+    \vspace{0.1cm}
+
+    \item Set vectors $\vv{\vbl}, \vv{\vout}, \vv{\vin}$ such that ${\vbl}_i = {\vbl}^\prime_{\psi(i)}$, ${\vout}_i = {\vout}^\prime_{\psi(i)}$,${\vin}_i = {\vin}^\prime_{\psi(i)}$;
+    \vspace{0.1cm}
+
+    \item Set $(\{\acct_{\delta,i}\}, \{\acct_{\epsilon,i}\}, \vec{r_\varbl}, \vec{r_\varout}, \vec{r_\varin}) \sample \createdelta(\inputs', \vv{\vbl}, \vv{\vout}, \vv{\vin})$;
+    \vspace{0.1cm}
+    
+    \item Update $\outputs' \gets \upddelta(\inputs', \{\acct_{\delta,i}\})$;
+    \vspace{0.1cm}
+
+    % \item Let $\psi_2 = \psi_1^{-1} \circ \psi, \tau_{2,i} = \frac{u_{1,i}}{\tau_{1,\psi_2(i)}}$ and $\rho_{2,(\varbl|\varout|\varin)} = \frac{u_{2,i} - \rho_{1,(\varbl|\varout|\varin)}}{\tau_{1,\psi_2(i)}} - r_{(\varbl|\varout|\varin) - \psi_2(i)}$
+    % \vspace{0.1cm}
+
+    \item Let $\psi_2 = \psi_1^{-1} \circ \psi, 
+    \rho_1^\prime = \frac{r_1}{\rho_1}, 
+    \vec{\rho_2^\prime} = \frac{r_2 - \rho_2}{\rho_1} - {r_\varbl}_i, 
+    \vec{\rho_3^\prime} = \frac{r_3 - \rho_3}{\rho_1} - {r_\varout}_i, 
+    \vec{\rho_4^\prime} = \frac{r_4 - \rho_4}{\rho_1} - {r_\varin}_i$ 
+    and let $\vec{\rho^\prime} = (\rho_1^\prime, \vec{\rho_2^\prime}, \vec{\rho_3^\prime}, \vec{\rho_4^\prime})$. 
+    % (So that $\outputs = \updacc( \outputs^\prime_{\psi_2(i)}, 0,0,0); \vec{\rho^\prime}$ )
+    % $\rho_{2,(\varbl|\varout|\varin)} = \frac{u_{2,i} - \rho_{1,(\varbl|\varout|\varin)}}{\tau_{1,\psi_2(i)}} - r_{(\varbl|\varout|\varin) - \psi_2(i)}$
+    \vspace{0.1cm}
+
+    \item Update $\outputs = \updacc(\{\outputs'_{\psi_2(i)},0,0,0\}_i; \vec{\rho^\prime})$
+    \vspace{0.1cm}
+
+    \item Generate a ZK proof $\pi = (\inputs', \outputs', \acct_{\delta}, \acct_{\epsilon}, \pi_1, \pi_2, \pi_3)$ for the relation $R_1 \land R_2 \land R_3$ where:
+    \begin{align*}
+        & R_1 = \{(\inputs, \inputs', (\psi_1, \vec{\rho})) | \\
+        & \ \ \verupdacc(\{\inputs'_i, \inputs_{\psi_1(i)},0,0,0\}_i; \vec{\rho}) = 1
+        \}, \\
+        % 
+        & R_2 = \{((\inputs', \outputs', \acct_{\delta}, \acct_{\epsilon}), (\sk, \{ \varbl, \varout, \varin \}_{i=0}^s, \vv{\vbl}, \vv{\vout}, \vv{\vin}, \vec{r_\varbl}, \vec{r_\varout}, \vec{r_\varin}))| \\
+        & \ \ \verupddelta (\inputs'_i, \outputs'_i, \acct_{\delta,i}) = 1 \ \forall i \\
+        & \ \ \land \verupdacc (\inputs'_i, \outputs'_i,0,0,0; 1, r_{\varbl, i}, r_{\varout, i}, r_{\varin, i}) = 1 \ \forall i \in [t+1,n]\\ 
+        & \ \ \land \vernonneg (\acct_{\epsilon,i}, {\vbl}_i, r_{\varbl,i}) = 1 \ \forall i \in [s+1,t] \\
+        & \ \ \land \veract (\outputs'_i, (\sk, {\varbl}_i + {\vbl}_i)) = 1 \ \forall i \in [1,s] \\
+        & \ \ \land \verdelta (\{ \acct_{\delta,i} \}, \{ \acct_{\epsilon,i} \}, \vv{\vbl}, \vv{\vout}, \vv{\vin}, \vec{r_{\varbl}}, \vec{r_{\varout}}, \vec{r_{\varin}}) = 1 \\
+        % & \ \ \land {\vbl}_i = {\vout}_i \ \forall i \in [1,s] \\
+        % & \ \ \land {\vbl}_i = {\vin}_i \ \forall i \in [s+1,t] 
+        & \ \ \land \versenderdelta(\acct_{\delta,i}, {\vbl}_i, r_{\varbl,i}, r_{\varout,i}) = 1 \ \forall i \in [1,s] \\
+        & \ \ \land \verrecdelta(\acct_{\delta,i}, {\vbl}_i, r_{\varbl,i}, r_{\varin,i}) = 1 \ \forall i \in [s+1,t]
+        \}, \\
+        % 
+        & R_3 = \{(\outputs', \outputs, (\psi_2, \vec{\rho^\prime})) | \\
+        & \ \ \verupdacc(\{\outputs_i, \outputs'_{\psi_1(2)},0,0,0\}_i; \vec{\rho^\prime}) = 1
+        \}
+    \end{align*}
+\end{enumerate}
+
+Now $R_1, R_3$ can be proven using a slight modification of the Bayer-Groth shuffle argument \cite{Bayer-GrothShuffle}.
+The $\Sigma_2$ protocol that proves $R_2$ consists of the following sub-protocols:
+\begin{enumerate}
+    \item $\Sigma_{vu}$: trivial check of $\verupddelta$.
+    
+    \item $\Sigma_{\delta}$: prover shows knowledge of $\vv{\vbl}, \vv{\vout}, \vv{\vin}, \vec{r_{\varbl}}, \vec{r_{\varout}}, \vec{r_{\varin}}$ such that \\
+     $\verdelta(\{\acct_{\delta,i}\}_{i=1}^{n}, \{\acct_{\epsilon,i}\}_{i=1}^{n}, \vv{\vbl}, \vv{\vout}, \vv{\vin}, \vec{r_{\varbl}}, \vec{r_{\varout}}, \vec{r_{\varin}}) = 1$. \\
+     $\Sigma_{\delta}$ can be implemented by using $\Sigma_{com}$: \\
+     $\Sigma_{\delta} = \land_{i=1}^n \Sigma_{com}((\pk_{\delta,i}, \com_{\delta,i}), (\pk_{\epsilon,i}, \com_{\epsilon,i}); (\vbl, r_{\varbl,i}, r_{\varbl,i})) \\
+     \land_{i=1}^n \Sigma_{com}((\pk_{\delta,i}, \com_{\delta,i}), (\pk_{\epsilon,i}, \com_{\epsilon,i}); (\vout, r_{\varout,i}, r_{\varout,i})) \\
+     \land_{i=1}^n \Sigma_{com}((\pk_{\delta,i}, \com_{\delta,i}), (\pk_{\epsilon,i}, \com_{\epsilon,i}); (\vin, r_{\varin,i}, r_{\varin,i}))$
+     , but the verifier additionally checks that $\pk_{\epsilon,i} = (g,h) \ \forall i$ and that $\prod_{i=1}^n \comm{{\vbl}_i}_{\epsilon} = (1,1)$.
+
+     \item $\Sigma^{i}_{zero}$: prover shows knowledge of $r_{\varbl,i}, r_{\varout,i}, r_{\varin,i}$ such that \\ 
+     $\verupdacc(\inputs'_i, \outputs'_i, 0,0,0;(1, r_{\varbl,i}, r_{\varout,i}, r_{\varin,i})) = 1$. \\ 
+     The sub-argument can be written as follows: \\
+     given $\acct_1 = (\pk, \comm{\vbl}_1, \comm{\vout}_1, \comm{\vin}_1), \acct_2 = (\pk, \comm{\vbl}_2, \comm{\vout}_2, \comm{\vin}_2)$, the prover knows $r_{\varbl}, r_{\varout}, r_{\varin}$ such that $\comm{\vbl}_1 = \comm{\vbl}_2 \cdot \pk^{r_{\varbl}}, \comm{\vout}_1 = \comm{\vout}_2 \cdot \pk^{r_{\varout}}, \comm{\vin}_1 = \comm{\vin}_2 \cdot \pk^{r_{\varin}}$. The equation is equivelant to $\land_{i=\{\varbl, \varout, \varin\}}\verupd(\pk, \frac{com_{2,i}}{com_{1,i}}, r_i) = 1$, hence can be done using AND-proofs of $\Sigma_{vu}$. 
+
+     \item $\Sigma^{i}_{vds}$: prover shows knowledge of $v, r_{\varbl,i}, r_{\varout,i}$ such that $\acct_{\delta,i}$ has the same value under commitments $\comm{\vbl}, \comm{\vout}$.
+     $\Sigma^{i}_{vds}$ can be implemented by using $\Sigma_{com}((\pk_{\delta,i}, \comm{\vbl}_i), (\pk_{\delta,i}, \comm{\vout}_i); ({\vbl}_i, r_{\varbl,i}, r_{\varout,i}))$.
+
+     \item $\Sigma^{i}_{vdr}$: prover shows knowledge of $v, r_{\varbl,i}, r_{\varin,i}$ such that $\acct_{\delta,i}$ has the same value under commitments $\comm{\vbl}, \comm{\vin}$.
+     $\Sigma^{i}_{vds}$ can be implemented by using $\Sigma_{com}((\pk_{\delta,i}, \comm{\vbl}_i), (\pk_{\delta,i}, \comm{\vin}_i); ({\vbl}_i, r_{\varbl,i}, r_{\varin,i}))$.
+
+     \item $\Sigma_{range}$: prover shows knowledge of $\acct_{\epsilon}, v, r$ such that $\vernonneg(\acct_{\epsilon},v,r)=1$. In order to implement this we use Bulletproofs \cite{Bulletproofs}.
+
+    %  //TODO: do we need to write it more formal?
+     \item Finally in order to prove $\veract(\acct, \sk, \varbl)$:
+     \begin{enumerate}
+        \item the prover shows knowledge of $\sk$ using $\Sigma_{dlog}$. 
+        \item Since sender may not know the randomness used to open his commitment, the prover opens the commitment with the $\sk$ and finds the value $\varbl$.
+        \item Chooses a new randomness $r \sample \mathbb{F}_p$ and constructs $\acct_{\epsilon} = ((g,h), \commit((g,h),\varbl;r))$.
+        \item Proves using $\Sigma_{com}$ that these two accounts has the same $\varbl$.
+        \item Proves using $\Sigma_{range}(\acct_{\epsilon}, \varbl, r)$ that $\varbl \in \vset$. 
+     \end{enumerate}
+     So $\Sigma_{range, \sk} = \Sigma_{dlog} \ \land \ \Sigma_{com} \ \land \ \Sigma_{range}$.
+
+\end{enumerate}
+Hence $\Sigma_2 = \Sigma_{vud} \ \land \ \Sigma_{\delta} \ \land \ \left( \land_{i=s+1}^{t} \Sigma_{range}(\acct_{\delta,i}, {\vbl'}_i, r_{\varbl,i}) \right) \ \land \ \left( \land_{i=t+1}^{n} \Sigma^{i}_{zero} \right) \ \land \ \left( \land_{i=1}^{s} \Sigma_{range, \sk}(\outputs'_i, \varbl_i + {\vbl}_i, \sk) \right) \ \land \ \left( \land_{i=1}^{s} \Sigma^{i}_{vds} \right) \ \land \left( \land_{i=s+1}^{t} \Sigma^{i}_{vdr} \right)$. $\Sigma_2$ is a public-coin SHVZK argument of knowledge of the relation $R_2$ as follows from the properties of AND-proofs.
+
+The full SHVZK argument knowledge of $\trans$ is then $\Sigma := \Sigma_1 \land \Sigma_2 \land \Sigma_3$.
+
+% \begin{enumerate}
+%     \item Let $\psi_1$ be a permutation such that $\psi_i(\sset^*)= [1,\snum], \psi_i(\rset^*) = [\snum, \rnum], \psi(\anset^*) = [\rnum,n]$. We update the accounts with zero values $\inputs' = \updacc(\{ \acct_{\psi_{1}(i)}, (0,0,0) \}_{i};r)$. Now $\inputs'$ is a permutation of $\inputs$ and we can prove its correctness using a slight modification of the Bayer-Groth shuffle argument \cite{Bayer-GrothShuffle}.
+%     \item Then we update the accounts in $\inputs'$ changing only the values of the commitments and keep the public key the same,  $\outputs' = \updacc(inputs', (\vv{\vbl}^\prime, \vv{\vout}^\prime, \vv{\vin}^\prime);(1, r_2, r_3, r_4))$. Now between the accounts in $\inputs'$ and $\outputs'$ that share the same public key we can show:
+%     \begin{itemize}
+%         \item using Bulletproofs that for $bl \in \inputs' , bl' \in \outputs', v_i = bl'_i - bl_i: \ \forall \acct_i \ i \in [1,\snum] \ bl'_i \in \vset \ \& \ \forall \acct_j \ j \in [\snum, \rnum]: \ v_j \in \vset$
+%         \item using the $\Sigma_{vu}$ that the acccounts in anonymity set $\acct_i \ i \in [\rnum, n]$ the balance remain the same. We must show given $\acct_1 = (pk, \com_1), \acct_2 = (pk, \com_2)$ the prover knows $r$ such that $\com_2 = \com_1 \cdot \pk^r$. This is equivelant to $\Sigma_{vu}$ with arguments $(\pk, \frac{\com_2}{\com_1}, r)$. The same approach is used to prove the argument 5.
+%     \end{itemize} 
+%     \item In order to show the preservation of value we can create temporary accounts that share the same public key and have as value a commitment $\com'_i$ to $v_i = bl'_i - bl_i \ \forall i \in [1,n]$. We use the $\Sigma_{com}$ protocol to prove that the commitments have the right value. Then, we prove that $\prod_1^n {\com'_i} = (1,1)$.
+%     \item Finally, like in step 1 we update the accounts in $\outputs'$ with zero values and with a permutation $\psi_2$ such that $\psi = \psi_1 \odot \psi_2$ and prove its correctness with Bayer-Groth shuffle argument.
+% \end{enumerate}

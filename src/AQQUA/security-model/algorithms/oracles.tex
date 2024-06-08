@@ -1,0 +1,111 @@
+% -------- Oracles for security definitions --------
+
+\begin{algorithm}[htbp]
+    \DontPrintSemicolon
+    \SetAlgoLined
+    \SetKwProg{oracle}{Oracle}{}{}
+    \SetKwFunction{discloseutxo}{\corruptAcctOracle}
+    \SetKwFunction{discloseusers}{\corruptUserOracle}
+    \SetKwFunction{disclose}{\corruptOracle}
+    \SetKwFunction{register}{\regOracle}
+    \SetKwFunction{transact}{\transOracle}
+    \SetKwFunction{applytransaction}{\applytxnOracle}
+    \SetKwFunction{createacct}{\createAcctOracle}
+    \SetKwFunction{deleteacct}{\deleteAcctOracle}
+    \SetKwFunction{au}{\auditOracle}
+
+
+    \caption{Oracles for security definitions}
+    \label{alg:oracles}
+
+    \oracle{\disclose{$\pk, \state$}}{
+        \tcp*{$\pk$ should be a key of an account or user information in $\state$, aborts otherwise}
+        $\sk \gets \findsecretkey(\pk, \state)$ \;
+        $\honest \gets \honest \setminus \{\sk\}$ \;
+        $\corrupt \gets \corrupt \cup \{\sk\}$ \;
+        \Return{$\sk$}
+    } 
+
+    \oracle{\register{}}{
+        $\state \gets \bookkeepingfunctionality.\stateslist[-1]$ \tcp*{most recent state of bookkeeping}
+        $(\sk, \userinfo, \acct, \pi)\gets \reg()$ \;
+        \If{$\verreg(\userinfo, \acct, \pi, \state) = 0$}{
+            \Return{$\bot$} \tcp*{cannot be registered given current state}
+        }
+        $\entries \gets \entries \cup \{\sk\}$ \;
+        $\honest \gets \honest \cup \{\sk\}$ \;
+        $\state^\prime \gets \applyreg(\userinfo, \acct, \state)$;
+        $\stateslist \gets \stateslist \cup [\state^\prime]$ \;
+        % //TODO: should we also return the proofs? the new userinfo can be found from state anyways
+        \Return{$\state^\prime$}
+    }
+
+    \oracle{\createacct{$\userinfo, \anset$}}{
+        $\state \gets \bookkeepingfunctionality.\stateslist[-1]$ \tcp*{most recent state of bookkeeping}
+        $\txnca \gets \createAcct(\userinfo, \anset)$ \;
+        % \If{$\vercreateAcct(\txnca, \state)=0$}{ 
+        \If{$\vertxn(\txnca, \state)=0$}{     
+            \Return{$\bot$} \tcp*{transaction cannot be applied to state}
+        }
+        $\state^\prime \gets \applytxn(\txnca, \state)$;
+        $\stateslist\gets \stateslist \cup [\state^\prime]$ \;
+        \Return{$\txnca, \state^\prime$}
+    }
+
+    \oracle{\deleteacct{$\userinfo, \accttotransfer, \accttodelete, \anset_1, \anset_2$}}{
+        $\state \gets \bookkeepingfunctionality.\stateslist[-1]$ \;
+        $\sk \gets \findsecretkey(\accttotransfer)$ \;
+        $\txnda \gets \deleteAcct(\sk, \userinfo, \accttotransfer, \accttodelete, \anset_1, \anset_2$) \;
+        % \If{$\verdeleteAcct(\txnca, \state)=0$}{ 
+        \If{$\vertxn(\txnda, \state)=0$}{ 
+            \Return{$\bot$} \tcp*{transaction cannot be applied to state}
+        }
+        $\state^\prime \gets \applytxn(\txnda, \state)$;
+        $\stateslist \gets \stateslist \cup [\state^\prime]$ \;
+        \Return{$\txnda, \state^\prime$}
+
+    }
+
+    % We have to make sure that: 1. all accounts in senders have the same secret key (this comes from verify), 2. that secret key is not corrupted. To solve this, just take the first account from senders, the rest will be handled by verify transaction, but do a sanity check as well
+    % //TODO: figure out why v appears differently in input and in algorithm :(
+    \oracle{\transact{$\sset, \rset, \vv{\v_{\sset}}, \vv{\v_{\rset}} ,\anset$}}{
+        $\state \gets \bookkeepingfunctionality.\stateslist[-1]$ \tcp*{most recent state of bookkeeping}
+        \For{$\sk \in \entries$}{
+            Take an arbitrary $\acct \in \sset$ \;
+            \If{$\verkp(\sk, \acct.\pk) = 1 $}{
+                $\txn\gets \trans(\sset, \rset, \vv{\v_\sset}, \vv{\v_\rset} \anset)$ \tcp*{If $\sk$ is not the owner of all accounts in $\sset$, the transaction will not be created.}
+                \If{$\vertxn(\txn, \state)=0$}{
+                    \Return{$\bot$} \tcp*{transaction cannot be applied to state}
+                }
+                $\state^\prime \gets \applytxn(\txn, \state)$;
+                $\stateslist\gets \stateslist \cup [\state^\prime]$ \;
+                \Return{$\txn, \state^\prime$}
+            }
+        }
+        \Return{$\bot$}
+    } 
+
+    \oracle{$\applytransaction(\txn)$}{
+        \If{$\vertxn(\txn, \state) = 0$}{
+            \Return{$\bot$}
+        }
+        $\state^\prime \gets \applytxn(\txn, \state)$ \;
+        $\stateslist\gets \stateslist \cup [\state^\prime]$;
+        \Return{$\state^\prime$}
+    }
+
+    \oracle{\au{$\inpk, \snap_1, \snap_2, f, \aux$}}{
+        $\sk \gets \findsecretkey(\inpk, \snap_1)$\;
+        \If{$\snap_1, \snap_2 \in \stateslist \land \snap_1 \textnormal{ \bf is older than } \snap_2$}
+        {
+            $\auditinfo \gets \audit(\sk, \inpk,\snap_1, \snap_2, f, \aux)$ \;
+            \If{$\vera(\inpk, \snap_1, \snap_2, (f,\aux), {\auditinfo})$}{
+                \Return{$\auditinfo$}
+            }
+        }
+        \Return{$\bot$} \tcp*{$\inpk$ was invalid for the snapshots, $\snap_1, \snap_2$ were not valid or $f$ was not satisfied}
+    }
+
+  \end{algorithm}
+
+% -------- End Oracles for security definitions --------

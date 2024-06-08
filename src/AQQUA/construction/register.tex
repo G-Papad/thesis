@@ -1,0 +1,79 @@
+% In order for a user to register, they should provide to the $\RA$ an initial public key $\inpk$ and physical identity information necessary to register.
+
+In order for users to register in the system, they first use the $\reg$ algorithm to create a secret key, a $\userinfo$ entry and a first empty account $\acct$. The $\reg$ algorithm also provides proofs that $\userinfo, \acct$ have been properly created. Then, the user sends $\userinfo, \acct$ and the proofs to the $\RA$ and the $\RA$ verifies the proofs using the $\verreg$ algorithm. If the proofs verify, the $\RA$ adds $\userinfo$ to the $\usersset$ and $\acct$ to the $\utxoset$ using the $\applyreg$ algorithm.
+
+% In order for users to register in the system, they first use the $\reg$ algorithm to create a secret key, a $\userinfo$ entry and a first account $\acct$ that has some specified initial balance. The initial balance should have been agreed with the $\RA$ in advance. The $\reg$ algorithm also provides proofs that $\userinfo, \acct$ have been properly created. Then, the user sends $\userinfo, \acct$ and the proofs to the $\RA$ and the $\RA$ verifies the proofs using the $\verreg$ algorithm. If the proofs verify, the $\RA$ adds $\userinfo$ to the $\usersset$ and $\acct$ to the $\utxoset$ using the $\applyreg$ algorithm.
+
+% As a result, users register to the $\RA$ and are associated with an initial stable public key $\inpk$ in order to take access to the system. This procedure takes place through the following protocol. User creates their registration informations through $\reg$ algorithm as well as an account with specified balance $\varbl$ and sends them along with their real identifications $\id$ through a side secure channel to the $\RA$. $\RA$ verifies these informations through $\verreg$ and if it is successful adds the user to the $\usersset$ using $\applyreg$. Additionally, stores the link between $(\id, \inpk)$ off-chain.
+
+% 2. How users register after all
+
+\subsubsection{Register}
+The $\reg$ algorithm 
+% takes as input the public parameters $\params$ and 
+creates a secret key $\sk$, the entry 
+$\userinfo = (\inpk, \comm{1})$ that will be later stored in the $\usersset$, the user's first account $\acct = (\pk, \comm{0}, \comm{0}, \comm{0})$ and a zero-knowledge proof $\pi$ for the fact that the commitments $\comm{1}$ of $\userinfo$ and $\comm{0}, \comm{0}, \comm{0}$ of $\acct$ are indeed commitments to the correct values. 
+% //TODO: do we need this sentence?
+The proof $\pi$  can be posted on-chain for public verification. 
+
+The user must keep $\sk$ secret, and sends through a secure channel $\userinfo, \acct, \pi$ to the $\RA$, together with their real-world identity information.
+The detailed description of the $\reg$ algorithm is depicted in \autoref{fig:register}.
+
+\begin{boxfig}{\label{fig:register}{The $\reg$ algorithm.}}%[htbp]
+% The $(\sk, \userinfo, \acct, \pi_m, \pi_a) \gets \reg(\secpar, \varbl)$ performs the following steps: 
+\ The $\reg$ algorithm performs the following steps: 
+\begin{enumerate}
+    \item Run $(\sk, \userinfo, \acct) \gets \genuser()$. 
+    \item Create a zero-knowledge proof $\pi$ of the relation $R(x,w)$, where \ $x = (\acct, \userinfo), w = (\sk)$ and $R(x,w) = 1$ if:
+    {\begin{align*} 
+        & \vercom(\userinfo.\inpk, \userinfo.\com_{\numaccs}, (\sk, 1)) = 1 \\
+        % //TODO: do we need this check? since we have verified opening of the commitment
+        & \wedge \verkp(\userinfo.\inpk, \sk)=1 \\
+        & \wedge \verkp(\acct.\pk, \sk) = 1 \\
+        & \wedge \vercom(\acct.\pk, \acct.\com_\varbl, (\sk, 0)) = 1 \\
+        & \wedge \vercom(\acct.\pk, \acct.\com_{\varout}, (\sk, 0)) = 1 \\
+        & \wedge \vercom(\acct.\pk, \acct.\com_{\varin}, (\sk, 0)) = 1 \\
+    \end{align*}}
+    % This proof is meant to be on-chain and anyone can verify it.
+
+    \item Return $(\sk, \userinfo, \acct, \pi)$.
+\end{enumerate}
+\end{boxfig}
+
+% \subsubsection{Register}
+% The $\reg$ algorithm takes as input the security parameter $\secpar$ and an initial balance $\varbl$ for the user's first account and creates a secret key $\sk$, the entry 
+% $\userinfo = (\inpk, \comm{1})$ that will be later stored in the $\usersset$, the user's first account $\acct = (\pk, \comm{\varbl}, \comm{0}, \comm{0})$ and proofs $\pi_m, \pi_a$. 
+% The proof $\pi_m$ is a proof for the fact that the commitments $\comm{1}, \comm{0}, \comm{0}$ of $\userinfo$ and $\acct$ are indeed commitments to $1, 0, 0$ and can be posted on-chain for public verification. 
+% The proofs $\pi_a$ proves that $\comm{\varbl}$ of $\acct$ is indeed a commitment to $\varbl$ and to be used only from the $\RA$. %since only the RA knows the initial balance?
+% The user must keep $\sk$ secret and sends through a secure channel $\userinfo, \acct, \pi_m, \pi_a$ to the $\RA$.
+% The detailed description of the $\reg$ algorithm is depicted in \autoref{fig:register}.
+
+% \begin{boxfig}{\label{fig:register}{The $\reg$ algorithm.}}
+% % The $(\sk, \userinfo, \acct, \pi_m, \pi_a) \gets \reg(\secpar, \varbl)$ performs the following steps: 
+% \ The $\reg$ algorithm performs the following steps: 
+% \begin{enumerate}
+%     \item Run $(\sk, \userinfo, \acct) \gets \genuser(\secpar, \varbl)$. 
+%     \item Create a zero-knowledge proof $\pi_m$ of the relation $R(x,w)$, where \ $x = (\acct, \userinfo, \varbl), w = (\sk)$ and $R(x,w) = 1$ if:
+%     {\begin{align*} 
+%         & \vercom(\userinfo.\inpk, \userinfo.\comm{\numaccs}, (\sk, 1)) = 1 \\
+%         & \wedge \verkp(\acct.\pk, \sk) = 1 \\
+%         & \wedge \varbl \in \vset \\
+%         & \wedge \vercom(\acct.\pk, \acct.\comm{\varout}, (\sk, 0)) = 1 \\
+%         & \wedge \vercom(\acct.\pk, \acct.\comm{\varin}, (\sk, 0)) = 1 \\
+%     \end{align*}}
+%     This proof is meant to be on-chain and anyone can verify it.
+
+%     \item Create a zero-knowledge proof $\pi_a$ of relation $R(x,w)$, where $x = (\acct, \varbl)$, $w= (\sk)$ and $R(x,w) = 1$ if: 
+%     {\begin{align*}
+%         & \vercom(\acct.\pk, \acct.\comm{\varbl}, (\sk, \varbl)) = 1 \\
+%     \end{align*}}
+%     This proof is meant only for the $\RA$ in order to ensure the validity of the specified balance $\varbl$.
+
+%     \item Return $(\sk, \userinfo, \acct, \pi_m, \pi_a)$.
+% \end{enumerate}
+% \end{boxfig}
+
+% Proof $\pi_m$ can be posted on-chain for public verification. Proof $\pi_a$ is designated for verification only from the $\RA$, in order to ensure the validity of the specified balance $\varbl$.
+
+% The user should keep $\sk$ secret, and will send through a secure channel $\userinfo, \acct, \pi_m, \pi_a$ to the $\RA$.
+

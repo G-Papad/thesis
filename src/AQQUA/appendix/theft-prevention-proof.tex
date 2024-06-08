@@ -1,0 +1,72 @@
+% \section{Full proof of theft prevention}
+
+% //TODO: Add reference to definition.
+\begin{theorem}
+    AQQUA satisfies theft prevention, as defined in \autoref{def:theft-prevention}.
+\end{theorem}
+\begin{proof}
+    Assume that there exists a PPT $\adv$ that wins the theft prevention game of Game~\ref{alg:theftprevention} with non-negligible probability. Using the notation of the game, we have that $\adv$ outputted a valid transaction $\txn$ that verifies and that results in one of the three winning conditions of the game being satisfied.
+%     \begin{itemize}
+%         \item[1.] $s^\prime_h < s_h$
+%         \item[2.] $s^\prime_c > s_c$
+%         \item[3.] $s^\prime_c + s^\prime_h > s_c + s_h$. 
+%     \end{itemize}
+    
+%    We will focus on the first condition, since the other two follow similarly.
+
+   We have that $\txn = (\inputs, \outputs, \pi)$, where $\pi$ is a ZK-proof for the relation $R(x,w)$ as defined in \autoref{fig:trans}, with $x = (\inputs, \outputs)$ and $w= (\sk, \varbl, \varout, \varin, \vv{\vbl}, \vv{\vout}, \vv{\vin}, \vv{r}, \psi, \isset^*, \irset^*, \ianset^*)$.
+   
+    From the soundness property of the NIZK argument of the $\trans$ algorithm, we can extract a witness $w^*= (\sk^*, \varbl^*, \cdots, \vv{\vbl^{*\prime}}, \cdots, \vv{r^*}, \cdots)$ such that $R(x, w^*)=1$.
+
+    % //TODO: make the below more formal-need to study the defs
+    % Furthermore, we note that after the execution of $\state^\prime \gets \applytxn(\txn, \state)$, we have that $\state^\prime$ is exactly like $\state$, but the accounts of $\inputs$ have been replaced with those of $\outputs$. 
+
+    Let $\acct\in \inputs$ be the account such that $\verkp(\sk^*, \acct.\pk) = 1$.
+    We divide into two cases.
+   \begin{itemize}
+    \item[1.] It holds that $\sk^* \in \honest$. In this case, we construct an adversary $\badv$ that breaks the unforgeability property of the UPK scheme with non-negligible probability.
+    
+    The reduction works as follows. The adversary $\badv$ takes as input a public key $\pk^*$. 
+    It also keeps a directed tree with root $(\pk^*, 1)$ and whose nodes will be tuples of the form $(\pk, r)$. The tree will be updated so that for every edge of the form $((\pk_1, \cdot), (\pk_2, r_2))$ it will hold that $\verupd(\pk_2, \pk_1, r_2)=1$. 
+    
+    $\badv$ answers to $\adv$'s oracle queries as follows.
+    \begin{itemize}
+        \item When $\adv$ queries the $\regOracle$ oracle and this query results in the $\reg$ algorithm to generate $\sk^*$, $\badv$ replaces $\userinfo.\inpk$ with $\pk^*$, and when $\newacc$ is called in the procedure, $\badv$ gives as input $\pk^*$. The adversary $\badv$ stores the public key of the newly created account and the randomness used as a child of $(\pk^*, 1)$ in the tree. For the rest of the $\regOracle$ queries, $\badv$ answers honestly.
+        \item When $\adv$ queries the $\createAcctOracle$ oracle for an account whose public key $\pk$ is contained in a leaf of the tree, $\badv$ answers honestly and adds a child to the leaf, composed of the updated public key of the updated account and the randomness used.
+        \item When $\adv$ queries the $\transOracle$ oracle, the adversary $\badv$ acts as follows.
+        \begin{itemize}
+            % \item If the public keys of the accounts in $\sset$ are contained in leaves of the tree, $\badv$ replaces the zero-knowledge proof in $\txn$ with a simulated one.
+            \item If the public keys of the accounts in $\sset$ are contained in leaves of the tree, $\badv$ creates an outputs set and creates a simulated proof for the transaction. $\badv$ also updates the tree by creating new children containing the updates of the public keys and the randomness. 
+            \item If there exist public keys of accounts in the anonymity set that are contained in leaves of the tree, $\badv$ creates new children containing the updates of the public keys and the randomness.
+        \end{itemize}
+        \item When $\adv$ queries the $\applytxnOracle$ with a transaction whose inputs contain a leaf of the tree, $\badv$ uses the proof contained in the transaction to extract the witness. Then, $\badv$ creates new children for the updates of the public keys, storing also the randomness of the witness.
+        \item For the rest of the oracle queries, $\badv$ answers honestly.
+    \end{itemize}
+    % Finally, when $\adv$ outputs the transaction $\txn$ of the theft prevention game, $\badv$ uses the extractor to extract a witness. The extracted witness contains a secret key $\sk^*$. The adversary $\badv$ finds the $\acct\in \inputs$ for which $\verkp(\sk^*, \acct.\pk)=1$, and finds the leaf $(\pk, r)$ of the tree for which $\acct.\pk = \pk$. Let $r^\prime$ be the multiplication of all randomnesses stored in the path from that leaf to the root. $\badv$ returns $(\pk, r^\prime)$.
+    Finally, when $\adv$ outputs the transaction $\txn$ of the theft prevention game, $\badv$ finds the $\acct\in \inputs$ for which $\verkp(\sk^*, \acct.\pk)=1$, and finds the leaf $(\pk, r)$ of the tree for which $\acct.\pk = \pk$. Let $r^\prime$ be the multiplication of all randomnesses stored in the path from that leaf to the root. $\badv$ returns $(\pk, r^\prime)$.
+    
+
+    If $\adv$ wins the theft prevention game, we have that $\verkp(\pk, \sk^*) = 1$ and $\verupd(\pk, \pk^*, r^\prime)=1$. Since $\adv$ can win with non-negligible probability, $\badv$ breaks unforgeability with non-negligible probability.
+
+
+    \item[2.] It holds that $\sk^*\in \corrupt$. 
+    
+    Assume w.l.o.g. that the transaction $\txn$ that $\adv$ outputs is the first transaction that results in winning the game (that is, there is no transaction submitted to $\applytxnOracle$ oracle prior to this point that would result in $\adv$ winning).
+
+    Since $\adv$ wins the game, we have that the sum of the openings of the committed balances of all the accounts (stored in the bookkeeping) of $\inputs$ is different from those of $\outputs$. 
+    
+    % Let $\varbl_i, i = 1,\dots, n$ be the opening of the committed balance of the accounts in $\inputs$ in the bookkeeping, and similarly $\varbl^\prime_i$ for the accounts in $\outputs$.
+
+    % From the soundness property of the NIZK argument of the $\trans$ algorithm, we have that for every $\acct\in \inputs$ and for the corresponding (w.r.t $\psi^*$ of $w^*$) account $\acct^\prime \in \outputs$ we have that $\verupdacc(\acct^\prime, \acct, \vbl^{\prime *}, \cdot, \cdot; \vv{r})=1 $. Furthermore, for the sender accounts of $\outputs$, we have that $\veract(\acct^\prime, \sk^*, \varbl^* + \vbl^{\prime *}, \cdot, \cdot)=1$.
+
+    From the soundness property of the NIZK argument of the $\trans$ algorithm, we have that for every sender account $\acct^\prime$ of $\outputs$, $\veract(\acct^\prime, \sk^*, \varbl^* + \vbl^{\prime *}, \cdot, \cdot)=1$.
+
+    Since $\veract$ returns $1$, and also $\sum_{\vbl^{\prime *} \in \vv{\vbl^{\prime *}}} \vbl^{\prime *} = 0$, and since $\adv$ wins the game, there exists an account $\acct \in \outputs$ for which $\acct.\com_{\varbl}$ has two different openings: one resulting from the bookkeeping, and one derived from the extracted witness (one of the values of the form $\varbl^* + \vbl^{\prime *}$ for some sender account). This trivially breaks the binding property of the commitment scheme.
+    % there should exist an account $\acct \in \inputs \cup \outputs$ such that the opening 
+    
+    % In this case, the condition $s^\prime_h < s_h$ is equivalent to the existence of accounts $\acct_h \in \inputs$, $\acct_h^\prime \in \outputs$, for which there exists an $\sk_h \in \honest$ such that $\verkp(\sk_h, \acct_h.\pk) = 1$ and $\verkp(\sk_h, \acct_h.\pk^\prime) = 1$ and $\opencom_{\sk_h}(\acct.\com_{\varbl})>\opencom_{\sk_h}(\acct^\prime.\com_{\varbl})$. 
+    
+    % We construct an adversary $\badv$ that is able to break the binding property of the commitment scheme.
+   \end{itemize}
+
+\end{proof}

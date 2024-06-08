@@ -1,0 +1,9 @@
+\subsubsection{Trans Verification}
+%The $0/1 \gets \vertxn(\txn)$ algorithm guarantees the validity of 
+The $\vertxn(\txn, \state)$ algorithm guarantees the validity of transaction $\txn$. 
+Depending on they transaction type $(\txn, \txnca, \txnda)$ performs the following steps:
+\begin{itemize}
+    \item if $\txn$ is an output of the $\trans$ algorithm, then it first checks that all the accounts listed in $\txn.\inputs$ are deemed unspent in the current state, meaning for each $\acct \in \txn.\inputs, \acct \in \state.\utxoset$. Afterwards, it executes the verification algorithm for the NIZK argument $\pi$ and returns its result.
+    \item if $\txnca$ is an output of the $\createAcct$ algorithm, then it first checks that all the $\userinfo$ listed in $\txnca.\inputs$ are registered, meaning, for each $\userinfo \in \txnca.\inputs $ we have that $\userinfo \in \state.\usersset$. It also ensures that $\txnca.\acct \not \in \state.\utxoset$. Afterwards, it executes the verification algorithm for the NIZK argument $\pi$ and returns its result.
+    \item if $\txnda$ is an output of the $\deleteAcct$ algorithm, then it first checks that all the accounts listed in $\txn.\inputs_\utxoset$ belong to $\state.\utxoset$ and similarly for $\inputs_\userinfo$. Afterwards, it executes the verification algorithm for the NIZK argument $\pi$ and returns its result.
+\end{itemize}

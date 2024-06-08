@@ -1,0 +1,68 @@
+\subsubsection{Trans Algorithm}
+Transactions enable a sender to redistribute their wealth to one or more recipients.
+Similarly to Quisquis~\cite{fauzi2019quisquis}, transactions are composed of input and output sets, which both include the sender and the intended recipients, and a NIZK proof that the output list has been computed according to the protocol specification. We assume that the size of each of the inputs and outputs sets is a predetermined number $\num$.
+
+% In order to hide the identity of the participating accounts, an anonymity set is included.
+% Operating under the assumption that the size of each of the inputs and outputs sets is a predetermined number $\num$, let $\pset$ be the set containing the sender and the receivers.
+% The anonymity set $\anset$ is of size $\num - |\pset|$, is picked uniformly from the $\utxoset$ and is passed as input to the $\trans$. %
+
+% To illustrate the construction of the transaction algorithm we describe a transaction that transfers an amount of coins from a sender to a recipient account. It uses the homomorphic property of the commitment scheme to subtract the amount from the sender's account balance and add it to the recipient's account balance. It also appropriately updates the total amount sent and total amount received of the sender and receiver accounts. The account public keys are re-randomized in order to hide the connection between the input and output accounts.
+
+The $\trans$ algorithm is used to create a transaction that redistributes a number of coins from a set of sender accounts, which are owned by the same secret key, to a set of receiver accounts. In order to substract an amount from a sender account or add an amount to a receiver account, the homomorphic property of the commitment scheme is used. Furthermore, in the algorithm the total amount sent and total amount received of the sender and receiver accounts is also updated appropriately. Finally, the account public keys are re-randomized in order to hide the connection between the input and output accounts.
+
+In order to hide the participating accounts, an anonymity set is included. The balances of the accounts belonging to the anonymity set do not change, however the commitments and the public keys are re-randomized in order to be indistinguishable from the actual participating accounts. 
+The account updates happen though the invocation of the $\updacc$ algorithm, and the outputs set is composed of these updated accounts.
+
+The ordering of the accounts in the input and output sets should not remain the same, since this trivially reveals the link between every account and its update.
+Therefore, the input and output lists are always ordered in some canonical order. This can be thought of as applying a random permutation to shuffle the updated accounts.
+
+% //TODO: Because the updated keys are distributed uniformly at random, this can be thought of as applying a random permutation $\psi$ to shuffle the updated accounts.
+
+The detailed description of the $\trans$ algorithm is depicted in \autoref{fig:trans}. It takes as input the sender's secret key $\sk$, the set of sender accounts $\sset$, the set of receiver accounts $\rset$, two vectors $\vv{\v_\sset}, \vv{\v_\rset}$ containing the desired changes to the balances of the sender and receiver accounts respectively, and an anonymity set $\anset$. It returns a transaction $\txn = (\inputs, \outputs, \pi)$, where $\pi$ is a zero-knowledge proof that $\outputs$ is created correctly.
+
+\begin{boxfig}{\label{fig:trans}{The $\trans$ algorithm.}}
+    / The algorithm $\txn \gets \trans(\sk,\sset, \rset, \vv{\v_\sset}, \vv{\v_\rset}, \anset)$ performs the following steps:
+    \begin{enumerate}
+        \item Ensure that for each $\acct \in \sset$, $\verkp(\sk, \acct.\pk) = 1 $, and that $|\sset| = |\vv{\v_\sset}|, |\rset| = |\vv{\v_\rset}|$.
+        \item Let $\isset = \{1, \dots, |\sset|\}$. For all $i \in \isset$, calculate the opening of the committed balance $\comm{\varbl_i}$ of $\acct_i \in \sset$, denoted $\varbl_i$.
+        \item Let $\vv{\vbl} = \vv{\v_\sset} || \vv{\v_\rset}$, where $||$ denotes vector concatenation. Let also $\irset = \{|\sset| + 1,\dots, |\sset| + |\rset|\}$.
+        Ensure that:
+        \begin{enumerate}
+            \item $\sum_{i\in \isset \cup \irset} {\vbl}_i = 0$
+            \item $\forall i \in\irset : {\vbl}_i \in \vset$
+            \item $\forall i \in \isset :-{\vbl}_i \in \vset \wedge \varbl_i + {\vbl}_i \in \vset$ 
+        \end{enumerate}
+                \item Construct $\vv{\vout}, \vv{\vin}$ as follows:
+                    \begin{enumerate}
+                        \item $\vv{\vout} = \vv{\v_\sset} || \underbrace{(0, \dots, 0)}_{\text{length } |\rset|}|| \underbrace{(0, \dots, 0)}_{\text{length } |\anset|}$
+                        \item $\vv{\vin} = \underbrace{(0, \dots, 0)}_{\text{length } |\sset|} || \vv{\v_\rset} || \underbrace{(0, \dots, 0)}_{\text{length } |\anset|}$.
+                    \end{enumerate}
+                    Furthermore, expand $\vv{\vbl}$ too with zero values for each $\acct \in \anset$.
+        \item Order $\pset \cup \anset$ in some canonical order and let $\inputs$ be the result. Let also $\vv{{\vbl}}^\prime,\vv{{\vout}}^\prime,\vv{{\vin}}^\prime$ be the permutation of $\vv{\vbl},\vv{\vout},\vv{\vin}$ in the same order.
+        Let $\isset^*, \irset^*, \ianset^*$ denote the indices of the respective accounts of the sender, the recipients and the anonymity set in this list.
+        \item Pick $r_1, r_2, r_3, r_4 \sample \randspace$ and let $\vv{r} = (r_1, r_2, r_3, r_4)$. \\
+        Perform $\updacc(\inputs,\vv{\vbl}^\prime, \vv{\vout}^\prime, \vv{\vin}^\prime; \vv{r})$, order the result in some canonical order, and denote by $\outputs$ the final result.
+        \item Let $\psi:[\num]\rightarrow [\num]$ be the implicit permutation mapping $\inputs$ into $\outputs$; such that accounts $\acct_i \in \inputs$ and $\acct^\prime_{\psi(i)}\in \outputs$ share the same secret key.
+        \item Form a zero-knowledge proof $\pi$ of the relation $R(x, w)$, where $x = (\inputs, \outputs), w = (\sk, \{{\varbl}_i, {\varout}_i, {\varin}_i\}_{i \in \isset^*}, \vv{\vbl}^\prime, \vv{\vout}^\prime, \vv{\vin}^\prime, \vv{r}, \psi, \isset^*, \irset^*, \ianset^*)$, and $R(x, w) = 1$ if 
+        % for all $i \in [\num], {\acct}_i \in \inputs, {\acct'}_{\psi(i)} \in \outputs$ we have that
+        {\begin{align*}
+            & \verupdacc({\acct'}_{\psi(i)},{\acct}_i,0,0,0;\vv{r})=1 \ \forall i \in \ianset^* \\
+            & \wedge (\verupdacc({\acct'}_{\psi(i)},{\acct}_i, {\vbl}'_i, {\vout}'_i, {\vin}'_i ;\vv{r})=1 \wedge {\vbl}'_i, {\vout}'_i, {\vin}'_i \in \vset) \ \forall i \in \irset^* \\
+            & \wedge \verupdacc({\acct'}_{\psi(i)}, {\acct}_{i}, {\vbl}'_{i}, {\vout}'_{i}, {\vin}'_{i}; \vv{r}) = 1 \ \forall i \in \isset^*\\
+            & \wedge \veract({\acct'}_{\psi(i)}, \sk, \varbl_i + {\vbl}'_{i}, \varout_i + {\vout}'_{i}, \varin_i + {\vin}'_{i}) = 1  \ \forall i \in \isset^*\\
+            & \wedge \sum_{i\in \isset^* \cup \irset^* \cup \ianset^*} {\vbl}'_i=0 \\
+            & \wedge {\vbl}'_{i} = {\vout}'_{i} \ \forall i \in \isset^* \\
+            & \wedge {\vbl}'_i = {\vin}'_i \ \forall i \in \irset^*\\
+            & \wedge {\vout}'_i = {\vin'}_i = 0 \ \forall i \in \ianset^*
+        \end{align*}}
+    \end{enumerate}
+
+    The transaction created is $\txn=(\inputs,\outputs,\pi)$.
+
+\end{boxfig}
+
+Due to the way transactions are generated, every address appears at most twice: 
+once when it is created in the output of some transaction, and once when included in the inputs of another transaction
+(regardless of whether it serves as the actual sender or is only included for anonymity).
+
+Our transaction construction is similar to the one of Quisquis~\cite{fauzi2019quisquis}, with the difference that we introduce the vectors $\vv{\vout}, \vv{\vin}$ to perform the updates to the associated total amount sent and total amount received of the accounts.

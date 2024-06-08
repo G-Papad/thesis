@@ -1,0 +1,18 @@
+\subsection{$\Sigma$-protocols}\label{subsec:sigma-protocols}
+
+Let $\mathcal{R}$ be a binary relation for instances $x$ and witnesses $w$, and let $\mathcal{L}$ be its corresponding language, i.e. $\mathcal{L} = \{ x | \exists w: (x,w) \in \mathcal{R}\}$. A $\Sigma$-protocol for $\mathcal{R}$ is a three-move public-coin protocol between two PPT algorithms $\prover,\verifier$, whose transcript consists of the following phases: 
+(1) \textbf{Commit}: $\prover$ commits to an initial message $a$ and sends it to $\verifier$ 
+(2) \textbf{Challenge}: $\verifier$ sends a challenge $c$ to $\prover$ 
+(3) \textbf{Response}: $P$ responds to the challenge with message $z$. 
+
+A $\Sigma$-protocol must satisfy the following properties:
+\begin{itemize}
+    \item \textbf{Completeness}: if $x \in \mathcal{L}$, $\verifier$ always accepts the transcript.
+    \item \textbf{Special Soundness}: given two transcripts with the same commitment and different challenges $(a,c,z), (a,c',z')$ one can efficient compute $w$ such that $(x,w) \in \mathcal{R}$.
+    \item \textbf{Special honest-verifier zero-knowledge (SHVZK)}: there exists a PPT simulator $\simulator$ that on input $x \in L$ and a honestly generated verifier's challenge $c$, outputs an accepting transcript of the form $(a, c, z)$ with the same probability distribution as a transcript between honest $\prover,\verifier$ on input $x$.
+\end{itemize}
+
+%//TODO: sanity check
+AQQUA utilizes the following $\Sigma$-protocols:
+proof of knowledge of discrete logarithm~\cite{fauzi2019quisquis}, proof of knowledge of DDH tuple~\cite{fauzi2019quisquis}, Bayer-Groth shuffle~\cite{Bayer-GrothShuffle},
+and Bulletproofs~\cite{Bulletproofs} for range proofs.

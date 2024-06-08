@@ -1,0 +1,212 @@
+% language 
+\newcommand{\sle}{\selectlanguage{english}}
+\newcommand{\slg}{\selectlanguage{greek}}
+
+\newcommand{\ddh}{\textup{\textsf{DDH}}}
+\renewcommand{\ro}{\mathcal{RO}}
+
+% //TODO: put a macro for sets of accounts!
+
+\providecommand{\snap}{\state}
+\newcommand{\params}{\textup{\texttt{{pp}}}} % public parameters
+\newcommand{\instate}{\state_0} % initial state produced by setup
+\providecommand{\auditinfo}{{\textup{\pcalgostyle{auditInfo}}}}
+
+% Algorithms for UPK
+\providecommand{\setup}{\pcalgostyle{Setup}}
+\providecommand{\kgen}{\pcalgostyle{KGen}}
+\providecommand{\upd}{\pcalgostyle{Update}}
+\providecommand{\verkp}{\pcalgostyle{VerifyKP}}
+\providecommand{\verupd}{\pcalgostyle{VerifyUpdate}}
+
+% Main algorithms
+\providecommand{\reg}{\pcalgostyle{Register}}
+\providecommand{\verreg}{\pcalgostyle{VerifyRegister}}
+\providecommand{\createAcct}{\pcalgostyle{CreateAcct}}
+\providecommand{\deleteAcct}{\pcalgostyle{DeleteAcct}}
+\providecommand{\vercreateAcct}{\pcalgostyle{VerifyCreateAcct}}
+\providecommand{\verdeleteAcct}{\pcalgostyle{VerifyDeleteAcct}}
+\providecommand{\trans}{\pcalgostyle{Trans}}
+\providecommand{\vertxn}{\pcalgostyle{VerifyTrans}}
+\providecommand{\audit}{\pcalgostyle{Audit}}
+\providecommand{\vera}{\pcalgostyle{VerifyAudit}}
+\providecommand{\applytxn}{\pcalgostyle{ApplyTrans}}
+\providecommand{\applyreg}{\pcalgostyle{ApplyRegister}}
+
+%Auxilary functions
+\providecommand{\vercom}{\pcalgostyle{VerifyCom}}
+% \providecommand{\genacct}{\pcalgostyle{GenAcct}}
+\providecommand{\veract}{\pcalgostyle{VerifyAcct}}
+\providecommand{\updacc}{\pcalgostyle{UpdateAcct}}
+\providecommand{\verupdacc}{\pcalgostyle{VerifyUpdateAcct}}
+\providecommand{\genuser}{\pcalgostyle{GenUser}}
+\providecommand{\veruser}{\pcalgostyle{VerifyUser}}
+\providecommand{\upduser}{\pcalgostyle{UpdateUser}}
+\providecommand{\verupduser}{\pcalgostyle{VerifyUpdateUser}}
+\providecommand{\newacc}{\pcalgostyle{NewAcct}}
+\providecommand{\vernewacc}{\pcalgostyle{VerifyNewAcct}}
+
+% Variables names
+\newcommand{\msg}{ \mathtt{m} }
+% \newcommand{\rnd}{ \rand }
+\newcommand{\rand}{\mathtt{r}}
+\newcommand{\id}{{\textup{\texttt{id}}}} % user "real" credentials
+\newcommand{\user}{\textup{\textsf{user}}}
+\newcommand{\acct}{\textup{\textsf{acct}}}
+\newcommand{\accttodelete}{\acct_\textsf{D}}
+\newcommand{\accttotransfer}{\acct_\textsf{C}}
+\newcommand{\userinfo}{\textup{\textsf{userInfo}}} % tupple in userSet
+\newcommand{\varbl}{\textup{\texttt{{bl}}}}
+\newcommand{\varout}{\textup{\texttt{{out}}}}
+\newcommand{\varin}{\textup{\texttt{{in}}}}
+\newcommand{\outdelete}{\varout_\textsf{D}}
+\newcommand{\indelete}{\varin_\textsf{D}}
+\newcommand{\inpk}{\textup{\texttt{pk}}_{0}} % initial public key
+\newcommand{\numaccs}{\textup{\texttt{\#accs}}}
+\newcommand{\srlimit}{\textup{\texttt{a}}_{max}} 
+\newcommand{\vtof}{\textup{\texttt{{v}}}_{t}} % value send to tax office
+\newcommand{\num}{{\textup{\texttt{n}}}} % number of accounts in the inputs of txns
+\newcommand{\inputs}{{\textup{\texttt{inputs}}}} % inputs of txns
+\newcommand{\outputs}{{\textup{\texttt{outputs}}}} % outputs of txns
+\newcommand{\aux}{{\textup{\texttt{aux}}}} % auxilary data to audit
+\newcommand{\com}{\texttt{com}} % a commitment to a value-we don't know the value
+
+\newcommand{\snum}{{\textup{\texttt{s}}}} % number of senders
+\newcommand{\rnum}{{\textup{\texttt{t}}}} % number of recipients
+
+% Transactions
+\newcommand{\txn}{\textup{\textsf{tx}}}
+\newcommand{\txnca}{\textup{\textsf{tx}}_\textsf{CA}}
+\newcommand{\txnda}{\textup{\textsf{tx}}_\textsf{DA}}
+
+% Commitments
+\newcommand{\comm}[1]{\fbox{$#1$}}
+\providecommand{\commit}{\pcalgostyle{Commit}}
+\newcommand{\verifycom}{\pcalgostyle{VerifyCom}}
+\newcommand{\opencom}{\pcalgostyle{OpenCom}}
+
+% Vectors values
+\newcommand{\vbl}{\textup{\texttt{{v}}}_{\varbl}}
+\newcommand{\vout}{\textup{\texttt{{v}}}_{\varout}}
+\newcommand{\vin}{\textup{\texttt{{v}}}_{\varin}}
+\newcommand{\vnumaccs}{\textup{\texttt{{v}}}_{\#accs}}
+\renewcommand{\v}{\texttt{v}} % a 'v' of the same style
+
+% user and utxo set
+\newcommand{\usersset}{\pcalgostyle{UserSet}}
+\newcommand{\utxoset}{\pcalgostyle{UTXOSet}}
+
+% policies
+\newcommand{\sendlimit}{\pcalgostyle{slimit}}
+\newcommand{\receivelimit}{\pcalgostyle{rlimit}}
+% \newcommand{\rate}{\pcalgostyle{rate}}
+\newcommand{\open}{\pcalgostyle{open}}
+\newcommand{\taxoffice}{\pcalgostyle{to}}
+\newcommand{\blacklist}{\pcalgostyle{blacklist}}
+\newcommand{\txnlimit}{\pcalgostyle{txlimit}}
+\newcommand{\nonpart}{\pcalgostyle{np}}
+
+% security-oracle queries
+% \newcommand{\corruptAcctOracle}{\pcalgostyle{CorruptAcct}}
+% \newcommand{\corruptUserOracle}{\pcalgostyle{CorruptUser}}
+\newcommand{\corruptOracle}{\pcalgostyle{OCorrupt}}
+\newcommand{\transOracle}{\pcalgostyle{O}\trans}
+\newcommand{\applytxnOracle}{\pcalgostyle{O}\applytxn}
+\newcommand{\regOracle}{\pcalgostyle{O}\reg}
+\newcommand{\verregOracle}{\pcalgostyle{O}\verreg}
+\newcommand{\createAcctOracle}{\pcalgostyle{O}\createAcct}
+\newcommand{\deleteAcctOracle}{\pcalgostyle{O}\deleteAcct}
+\newcommand{\veraOracle}{\pcalgostyle{O}\vera}
+\newcommand{\vercreateAcctOracle}{\pcalgostyle{O}\vercreateAcct}
+\newcommand{\auditOracle}{\pcalgostyle{O}\audit}
+
+% security-bookkeeping
+\newcommand{\activeacc}{\pcalgostyle{active}}
+\newcommand{\inactiveacc}{\pcalgostyle{inactive}}
+\newcommand{\status}{\pcalgostyle{status}}
+\newcommand{\bookkeepingfunctionality}{\pcalgostyle{bookkeeping}}
+\newcommand{\initbookkeeping}{\pcalgostyle{init}}
+\newcommand{\updatebookkeeping}{\pcalgostyle{update}}
+\newcommand{\countwealth}{\pcalgostyle{totalWealth}}
+\newcommand{\findsecretkey}{\pcalgostyle{findSecretKey}}
+\newcommand{\verifypolicy}{\pcalgostyle{verifyPolicy}}
+
+% another adversary
+\newcommand{\badv}{\mathcal{B}}
+
+% security-corrupt and honest sets of users
+\newcommand{\entries}{\pcalgostyle{entries}}
+\newcommand{\honest}{\pcalgostyle{honest}}
+\newcommand{\corrupt}{\pcalgostyle{corrupt}}
+\newcommand{\stateslist}{\pcalgostyle{states}}
+% for count wealth of bookkeeping
+\newcommand{\honestorcorrupt}{\pcalgostyle{set}}
+\newcommand{\type}{\pcalgostyle{type}}
+
+\newcommand{\utxo}{\pcalgostyle{utxo}}
+
+% experiments and advantage
+\newcommand{\exper}{\textup{\textsf{Exp}}}
+\newcommand{\anonymity}{\textup{anon}}
+\newcommand{\theftprevention}{\textup{theft}}
+\newcommand{\auditsoundness}{\textup{ausound}}
+
+% Sets and Spaces
+\newcommand{\group}{\mathbb{G}}
+\newcommand{\msgspace}{\mathcal{M}} 
+\newcommand{\randspace}{\mathcal{R}}
+\newcommand{\vset}{\mathcal{V}} % space of values for bl, out, in
+\newcommand{\anset}{{\mathtt{A}}} % anonymity set
+\newcommand{\pset}{\mathtt{P}} % sender & receiver set
+\newcommand{\rset}{\mathtt{R}} % receiver set
+\newcommand{\sset}{\mathtt{S}} % senders set
+\newcommand{\indices}{\mathtt{I}} % indices set
+\newcommand{\isset}{\indices_\sset} % indices of sender set
+\newcommand{\irset}{\indices_\rset} % indices of receiver set
+\newcommand{\ianset}{\indices_\anset} % indices of anonymity set
+\newcommand{\blist}{\pcalgostyle{BL}} % blacklist set
+
+% Authorities 
+\newcommand{\RA}{\textup{\texttt{{RA}}}}
+\renewcommand{\AA}{\textup{\texttt{{AA}}}}
+\newcommand{\UU}{\textup{\texttt{{U}}}}
+
+% Auxiliary functions for proof system
+\providecommand{\createdelta}{\pcalgostyle{CreateDelta}}
+\providecommand{\verdelta}{\pcalgostyle{VerifyDelta}}
+\providecommand{\vernonneg}{\pcalgostyle{VerifyNonNegative}}
+\providecommand{\upddelta}{\pcalgostyle{UpdateDelta}}
+\providecommand{\verupddelta}{\pcalgostyle{VerifyUD}}
+\providecommand{\versenderdelta}{\pcalgostyle{VerifyDeltaSender}}
+\providecommand{\verrecdelta}{\pcalgostyle{VerifyDeltaReceiver}}
+
+\providecommand{\nizkprove}{\pcalgostyle{NIZK.Prove}}
+
+\newenvironment{boxfig}[2]{%
+	\begin{figure}[!]
+		\newcommand{\FigCaption}{#1}
+		\newcommand{\FigLabel}{#2}
+	      \vspace{-0.25cm}
+		\begin{center}
+			\begin{small}
+				\begin{tabular}{@{}|@{~~}l@{~~}|@{}}
+					\hline
+					\rule[-1.5ex]{0pt}{1ex}\begin{minipage}[b]{\textwidth}
+						\vspace{1ex}
+						\smallskip
+					}{%
+				\end{minipage}\\
+				\hline
+			\end{tabular}
+		\end{small}
+	    \vspace{-0.35cm}
+		\caption{\FigCaption}
+	\end{center}
+	\vspace{-0.5cm}
+\end{figure}
+}
+
+\newenvironment{game}[1][htbp]
+  {\renewcommand{\algorithmcfname}{Game}% Update algorithm name
+   \begin{algorithm}[#1]%
+  }{\end{algorithm}}

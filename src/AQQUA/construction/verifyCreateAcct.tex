@@ -1,0 +1,4 @@
+\subsubsection{Create Account Verification}
+
+%The $0/1 \gets \vercreateAcct(\txnca)$ algorithm guarantees the 
+The $\vercreateAcct(\txnca, \state)$ algorithm guarantees the validity of transaction $\txnca$. First, it checks that all the $\userinfo$ listed in $\txnca.\inputs$ are registered and compliant in the current state, meaning for each $\userinfo \in \txnca.\inputs, \userinfo \in \usersset$. Afterwards, it executes the verification algorithm for the NIZK argument $\pi$ and returns its result.

@@ -1,0 +1,41 @@
+Privacy vs Auditability: 
+Addressing this dilemma becomes urgent, 
+as blockchain technology advances and decentralized digital payment systems (DPS) evolve and gain in popularity.
+This prominence of DPS brings about integration with the heavily regulated traditional financial systems. 
+A major question that must be answered is to what extent this can be achieved without sacrificing privacy and decentralization. 
+
+All flavors of DPS have some built-in support for privacy and regulation, even if it is rudimentary. 
+Starting with Bitcoin~\cite{nakamoto2009bitcoin} all DPS share the common feature of depending on a globally distributed, append-only, public ledger to document monetary transactions in a transparent, verifiable and immutable manner. 
+The underlying consensus mechanism used to settle exchange history and introduce new transactions, along with the security properties of the cryptographic primitives employed, makes sure that these systems adhere to some (simple) rules.  Further auditing can be achieved by merely inspecting this ledger, as everything is in the clear.   
+To protect their privacy, users  rely on the use of renewable pseudonyms to obscure their identities (but not the amounts exchanged). 
+It has been shown, though, that by combining publicly available data from the blockchain in a smart way~\cite{MeiklejohnPJLMV16}, anyone could link the pseudoidentities of the users and even uncover their real-world identities. 
+
+To overcome this problem, privacy-enhanced cryptocurrencies (e.g. Zerocash~\cite{Zerocash}, Monero~\cite{Monero}, Quisquis~\cite{fauzi2019quisquis}) arose. These systems hide transaction identities and amounts exchanged, thus providing privacy in a provable cryptographic manner.
+At the same time, however, they allow malicious users to conduct illegal activities (e.g. money laundering, unauthorized money transition, tax evasion). 
+This misuse of privacy has led to the need for a compromise, i.e. the creation of protocols that combine user privacy and auditability. 
+Such auditable privacy solutions~\cite{GGM16, PGC, Peredi, Pisces,zkLedger}
+aim to guarantee that both the system and its participants comply with financial regulations and laws, preventing them from engaging in illicit activities without being accountable to the authorities.
+Financial regulations that are usually supported in such schemes are KYC (Know-Your-Customer), Anti Money Laundering (AML) as well as restrictions to the number or the value of transactions a single user can make, or the total value that can be exchanged in a single transaction.
+
+\paragraph*{Our proposal.}
+We propose AQQUA: a system to equip DPS with auditability, without changing its decentralized, permissionless, and trustless nature. 
+AQQUA extends the well-known Quisquis~\cite{fauzi2019quisquis} DPS with mechanisms to allow the auditing of transactions and to enforce policies on the users.
+We achieve this by introducing two more entities to the system: A Registration Authority ($\RA$) and an Audit Authority ($\AA$). 
+These authorities serve specific auditing-related goals, and do not interfere with day-to-day transactions.
+
+In order to transact in AQQUA, users must first register to the $\RA$ and provide their real-world credentials, thus fulfilling KYC.
+They acquire a cryptographic pseudonym, a unique initial public key, which can be used to create new accounts within AQQUA.
+The $\RA$ maintains a mapping between the total number of accounts that belong to a particular user and their initial public key, but does not further interfere with monetary interchanges, i.e. the $\RA$ cannot censor users after they have enrolled to the system.
+To protect user privacy, the total number of accounts for each registered user is maintained in committed form. 
+
+In order to ensure anonymous participation, each user can subsequently create new accounts that are provably unlinkable to their registered public key. 
+This is achieved by utilizing~\emph{updatable public keys}, introduced in \cite{fauzi2019quisquis}, which allow the creation of new, provably indistinguishable and independent public keys, from an initial key pair, without changing the underlying secret counterpart.
+While each user can create accounts on their own, they must always update the number of accounts that they use with the $\RA$. 
+AQQUA accounts consist of commitments (for confidentiality) for the balance, the total amount of coins spent and the total amount of coins received in the corresponding updatable public key. 
+In AQQUA, transactions can be thought of as `wealth redistribution' between inputs and outputs, an idea originating from Quisquis \cite{fauzi2019quisquis}. Input accounts include the senders, the recipients as well as an anonymity set. 
+Output accounts are new, updated but unlikable accounts for the senders, recipients, and decoys. 
+To counter theft prevention, the sender proves in zero-knowledge that they have correctly updated the accounts and have not taken coins away from anyone except themselves.
+
+Finally, the audit is executed by the $\AA$ asynchronously on the initial public key of each user. 
+During auditing, each user should prove in zero-knowledge that for a specified period of time all of the their accounts are compliant to the system's policies using data that are only stored on-chain. 
+Penalties for non-compliance can then be enforced to the users.

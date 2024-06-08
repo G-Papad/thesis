@@ -1,0 +1,52 @@
+\subsubsection{Delete Account Algorithm}
+Allowing users to delete zero-balance accounts reduces the storage overhead of AQQUA, since accounts that have no balance left to spend might be abandoned and thus not needed to be stored in the $\utxoset$. Furthermore, due to the fact that senders usually create new accounts for their intended recipients, the number of accounts in the $\utxoset$ increases if the option to remove zero-balance accounts is not given. We note that users should be incentivized to delete the zero-balance accounts they own and don't need to keep. The mechanism to do so is left for future work.
+
+In order to delete an account, the information containing the total amount $\varout, \varin$ sent and received by the account must be transferred to another account $\accttotransfer$ of the corresponding owner. In order to hide $\accttotransfer$ an anonymity set is included. % //TODO: add/explain why this is needed.
+
+The detailed description of the $\deleteAcct$ algorithm is depicted in \autoref{fig:deleteAcct}. The algorithm takes as input the secret key $\sk$, the account to be deleted $\accttodelete$, the account $\accttotransfer$ to which $\varout, \varin$ of $\accttodelete$ will be transferred, and anonymity sets $\anset_1$ for the $\utxoset$ and $\anset_2$ for the $\usersset$ respectively. It returns a transaction $\txnda = (\inputs, \outputs, \pi)$.
+
+\begin{boxfig}{\label{fig:deleteAcct}{The $\deleteAcct$ algorithm.}}
+/ 
+The algorithm $\deleteAcct(\sk, \userinfo, \accttodelete, \accttotransfer, \anset_1, \anset_2)$ performs the following steps:
+\begin{enumerate}
+    % \item For the account $\accttodelete$, calculate the opening of the commitments $\com_{\varbl}, \com_{\varout}, \com_{\varin}$, denoted $\varbl_d, \outdelete, \indelete$, using the secret key $\sk$.
+    \item For the account $\accttodelete$, calculate the opening of the commitments $\accttodelete.\com_{\varout}, \accttodelete.\com_{\varin}$, denoted $\outdelete, \indelete$, using the secret key $\sk$.
+    \item Let  $\inputs_\utxoset = \{\accttotransfer\} \cup \anset_1$ in some canonical order.
+    Let $c^*, {{\ianset}_1}$ denote the indices of the account to be added the information and the accounts of the anonymity set in this list.
+    \item Construct $\vv{\vbl}, \vv{\vout}, \vv{\vin}$ as follows:
+    \begin{itemize}
+        \item $\vv{\vbl} = 0 \ \forall i \in \{c^*\}\cup {\ianset}_1$ 
+        \item $\vv{\vout} = 0 \ \forall i \in {{\ianset}_1} \text{ and } {\vout}_{c^*} = \outdelete$
+        \item $\vv{\vin} = 0 \ \forall i \in {{\ianset}_1} \text{ and } {\vin}_{c^*} = \indelete$
+    \end{itemize}
+    \item Pick $r_1, r_2, r_3, r_4 \sample \randspace$. and let $\vv{r} = (r_1, r_2, r_3, r_4)$. Let $\outputs_\utxoset$ be the output of $\updacc(\inputs_\utxoset,\vv{\vbl}, \vv{\vout}, \vv{\vin}; \vv{r})$ in some canonical order.
+    \item Let $\psi:[\num]\rightarrow [\num]$ be the implicit permutation mapping $\inputs_\utxoset$ into $\outputs_\utxoset$; such that accounts $\acct_i \in \inputs_\utxoset$ and $\acct^\prime_{\psi(i)}\in \outputs_\utxoset$ share the same secret key.
+    
+    %//TODO: fic alignment
+    \item Form a zero-knowledge proof $\pi_1$ of the relation $R(x, w)$, where \\
+     $x = (\accttodelete, \inputs_\utxoset, \outputs_\utxoset), w = (\sk, \outdelete, \indelete, \vv{r}, \psi, c^*, {{\ianset}_1})$, and $R(x, w) = 1$ if 
+    % for all $i \in [\num], {\acct}_i \in \inputs_\utxoset, {\acct'}_{\psi(i)} \in \outputs_\utxoset$ we have that:
+    {\begin{align*}
+        & \verkp(\sk, \accttodelete.\pk) = 1 \land \verkp(\sk, \acct_{c^*}.\pk) = 1\\
+        & \land \verupdacc({\acct'}_{\psi(i)},{\acct}_i,0,0,0;\vv{r})=1 \ \forall i \in {{\ianset}_1} \\
+        & \land \verupdacc({\acct'}_{\psi(c^*)},{\acct}_{c^*}, 0, \outdelete, \indelete ;\vv{r})=1 \\
+        & \land \vercom(\accttodelete.\pk, \accttodelete.\com_{\varbl}, (\sk, 0)) = 1 \\
+    \end{align*}}
+
+    \item Let $\inputs_\usersset = \{\userinfo\} \cup \anset_2$ in some canonical order. Let $s^*, {{\ianset}_2}$ denote the indices of the chosen initial public key for which we wish to construct the new account, and the anonymity set in this list. 
+    \item Construct $\vv{\v}$ as follows: $\v_i = 0 \ \forall i \in {{\ianset}_2}$ and $\v_{s^*} = -1$. 
+    \item Pick $r \sample \randspace$ and let $\outputs_\usersset$ be the output of $\upduser(\inputs_\usersset, \vv{\v};r)$.
+    \item Form a zero-knowledge proof $\pi_2$ of the relation $R(x, w)$, where 
+     $x=(\inputs_\usersset, \outputs_\usersset), w = (\sk, r, s^*, {{\ianset}_2})$ and $R(x,w) = 1$ if $\forall i \in \{s^*\} \cup {{\ianset}_2} \ \userinfo_i \in \inputs_\usersset, \userinfo'_i \in \outputs_\usersset$ we have that:
+        {\begin{align*}
+            & \verkp(\sk, \userinfo_{s^*}.\inpk) = 1 \\
+            & \land \verupduser(\userinfo'_i, \userinfo_i, 0;r) = 1 \ \forall i \in {{\ianset}_2} \\
+            & \land \verupduser(\userinfo'_{s^*}, \userinfo_{s^*}, -1;r) = 1 \\
+        \end{align*}}
+
+\end{enumerate}
+
+
+The final transaction returned by the algorithm is \\ $\txnda = (\inputs_\utxoset, \outputs_\utxoset, \inputs_\usersset, \outputs_\usersset, \pi = (\pi_1, \pi_2))$.
+
+\end{boxfig}

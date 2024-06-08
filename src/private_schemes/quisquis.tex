@@ -1,1 +1,20 @@
 \subsection{Quisquis}
+
+Quisquis \cite{fauzi2019quisquis} is another approach to the construction of a decentralized private payment system. It's goal is to implement such a system without the disadvantages of the aforementioned systems. These drawbacks relate to the trusted setup of zk-SNARKs and the limited storage scalability of the ever-growing list of UTXO set. 
+
+Quisquis working model is a hybrid one.In other words, it combines the account model, since each user has several accounts with its corresponding balance, with the UTXO logic, since transactions contain UTXO entries rather than accounts.This is made possible by the use of updatable public keys, a primitive that makes it possible to have a number of different public keys associated with the same private key. All of these keys are derived from the same original public key. In this way, a user can use the same private key to spend all of the UTXOs (denoted by the updated keys) that belong to his or her account. Each public key is used a maximum of twice, once during its generation on the output side and once during its use on the input side of a transaction.
+
+Anonymity is achieved through the combination of anonymity sets with the use of the updatable public key primitive. More specifically, transactions can be thought of as "wealth redistribution" between inputs and outputs \autoref{fig:quisquis-redist-of-value}. Input accounts include the senders, the recipients as well as an anonymity set. Output accounts are new, updated but unlikable accounts for the senders, recipients, and decoys.
+
+Confidentiality is achieved through a commitment scheme. Both the balances in the accounts and the transacted amounts are given in a commitment form. A user can change the corresponding commited value using the homomorphic property of the commitment scheme.
+
+Finally, each transaction includes zero-knowledge proofs derived from $\Sigma$-protocols in order to ensure its validity.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/quisquis/redist-of-value.png}
+    \caption{Example of redistribution of value in Quisquis}
+    \label{fig:quisquis-redist-of-value}
+\end{figure}
+
+\input{src/AQQUA/preliminaries/upk.tex}

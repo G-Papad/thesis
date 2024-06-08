@@ -1,0 +1,137 @@
+% -------- Bookkeeping functions --------
+% TODO describe them in the the text
+\begin{algorithm}[htbp]
+    \DontPrintSemicolon
+    \SetAlgoLined
+
+    \SetKwProg{function}{Function}{}{}
+
+    \SetKwFunction{init}{\initbokkeeping}
+    \SetKwFunction{totalwealth}{\countwealth}
+    \SetKwFunction{findkey}{\findsecretkey}
+    \SetKwFunction{update}{\updatebookkeeping}
+    \SetKwFunction{verpolicy}{\verifypolicy}
+
+    \caption{$\bookkeepingfunctionality$ functionalities}
+    \label{alg:bookkeeping}
+
+    $\entries \gets \emptyset$ \tcp*{set of all secret keys}
+    $\corrupt \gets \emptyset$ \tcp*{set of corrupt secret keys}
+    $\honest \gets \emptyset$ \tcp*{set of honest secret keys}
+    $\stateslist \gets [ ]$ \tcp*{list of states, updated through oracles}
+    % $\state \gets (\emptyset, \emptyset)$ \tcp*{most recent state}
+
+    \function{$\findkey{\pk, \state}$}{
+        \If{$\state \not \in \stateslist$}{
+            \Return{$\bot$}
+        }
+        \For{$\sk \in \entries$}{
+                
+            \For{$\acct \in \state.\utxoset$}{
+                \If{$\acct.\pk = \pk \land \verkp(\sk, \acct.\pk) = 1$}{
+                    \Return{$\sk$}
+                } 
+            }
+            \For{$\userinfo \in \state.\usersset$}{
+                \If{$\userinfo.\inpk = \pk \land \verkp(\sk, \userinfo.\pk) = 1$}{
+                    \Return{$\sk$}
+                }
+            }                
+        }
+        \Return{$\bot$}
+    }
+
+    % \function{$\update{\txn}$}
+    % {
+    %         \For{$\sk \in \entries$}{
+    %                 \For{$\acct \in \txn.\outputs$}{
+    %                     \If{$\verkp(\sk, \acct.\pk)$}{
+    %                         $\acctsmapping(\sk)\gets \acctsmapping(\sk)\cup\{\acct\}$ \;
+    %                     }
+    %                 }
+    %         }
+    % }
+    % \function{\update{$\txnca$}}{
+    %     let $\txnca = (\acct , \cdot, \{\userinfo_i^\prime\}_{i=1}^n, \cdot)$ \;
+    %     \For{$\sk \in \entries$}{
+    %         \If{$\verkp(\sk, \txnca.\acct.\pk)$}{
+    %             $\acctsmapping(\sk) \gets \acctsmapping(\sk) \cup \{\txnca.\acct\}$\;
+    %         }
+    %     }
+    %     \For{$\userinfo \in \{\userinfo_i^\prime\}_{i=1}^n$}{
+    %         \For{$\sk \in \entries$}{
+    %             \If{$\verkp(\sk, \userinfo.\inpk)=1$}{
+    %                 $\userinfomapping(\sk) \gets \userinfo$
+    %             }
+    %         }
+    %     }
+    % }
+
+    \function{$\totalwealth{\honestorcorrupt, \state}$}{
+        $s \gets 0$ \;
+        \For{$\sk \in \honestorcorrupt$}{
+            \For{$\acct \in \state.\utxoset$}{
+                \If{$\verkp(\sk,\acct.\pk)$}{
+                    $s \gets s + \opencom(\sk, \acct.\com_\varbl)$ \;
+                    % $s\gets s + \varbl(\acct)$  \tcp*{find balance by opening the commitment $\comm{\varbl}$ of $\acct$}
+                }
+            }
+        }
+        \Return{$s$}
+    }
+
+    % \function{$\findkey{\acct}$}{
+    %     \For{$\sk \in \entries$}{
+    %         \If{$\verkp(\sk, \acct.\pk) = 1 \land \acct \in \acctsmapping(\sk)$}{
+    %             \Return{$\sk$}
+    %         }
+    %     }
+    %     \Return{$\bot$}
+    % }
+
+    % \function{$\findkey{\userinfo}$}{
+    %     \For{$\sk \in \entries$}{
+    %         \If{$\verkp(\sk, \userinfo.\pk) = 1 \land \userinfo = \userinfomapping(\sk)$}{
+    %             \Return{$\sk$}
+    %         }
+    %     }
+    %     \Return{$\bot$}
+    % }
+
+    \function{\verpolicy{$\inpk, \snap_1, \snap_2, f, \aux$}}{
+        \If{$\snap_1, \snap_2 \not\in \stateslist \lor \snap_1 \textnormal{ \bf is not older than } \snap_2$}
+        {
+            \Return{$\bot$}
+        }
+        $A_1, A_2 \gets \emptyset, \emptyset$ \;
+        $\sk \gets \findsecretkey(\inpk, \snap_1)$ \;
+        % \For{$\acct\in \acctsmapping(\sk)$}{
+        %     \tcp*{find the stored accounts owned by $\sk$ in $\snap_1$ and $\snap_2$}
+        %     \If{$\acct \in \snap_1.\utxoset$}{
+        %         $A_1\gets A_1\cup \{\acct\}$ \;
+        %     }
+        %     \If{$\acct \in \snap_2.\utxoset$}{
+        %         $A_2 \gets A_2\cup\{\acct\}$ \;
+        %     }
+        % }
+        
+        \tcp*{Find accounts owned by $\sk$ in $\snap_1.\utxoset$ and $\snap_2.\utxoset$ resp.}
+        \For{$\acct \in \snap_1.\utxoset$}{
+            \If{$\verkp(\sk,\acct.\pk)$}{
+                $A_1 \gets A_1\cup \{\acct\}$ 
+            }
+        }
+        \For{$\acct \in \snap_2.\utxoset$}{
+            \If{$\verkp(\sk,\acct.\pk)$}{
+                $A_2 \gets A_2\cup \{\acct\}$ 
+            }
+        }
+        % \\TODO: Do we need to check if VerifyPK(A, sk)? because the acct have been already been chosen from the owner of sk (ACCT(sk))
+        \If{$f(\inpk, (\snap_1, \snap_2), \aux) =1 $}{
+            \tcp*{Check if $f$ holds using $A_1, A_2, \sk$}
+            \Return{$1$}
+        }
+        \Return{$0$}
+    } 
+
+\end{algorithm}

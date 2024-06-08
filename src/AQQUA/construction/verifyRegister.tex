@@ -1,0 +1,8 @@
+\subsubsection{Verify Register}
+
+% The $0/1 \gets \verreg(\userinfo, \acct, \pi_m, \pi_a)$ algorithm
+
+The $\verreg(\userinfo, \acct, \pi, \state)$ algorithm guarantees the validity of the registration information. It first checks that the $\userinfo.\inpk$ does not already exist in a $\userinfo$ entry of $\usersset$. Afterwards, it executes the verification algorithm for the NIZK argument $\pi$ and returns its result.
+
+% The $\verreg(\userinfo, \acct, \pi_m, \pi_a, \state)$ algorithm guarantees the validity of the registration information. It first checks that the $\userinfo.\inpk$ does not already exist in $\usersset$. Afterwards, it executes the verification algorithm for the NIZK arguments $\pi_m, \pi_a$ and returns its result.
+

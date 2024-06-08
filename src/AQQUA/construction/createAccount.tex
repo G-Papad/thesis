@@ -1,0 +1,53 @@
+\subsubsection{Create Account Algorithm}
+Within the system every user can create a new account for any other registered user, which improves the efficiency of the system~\cite{fauzi2019quisquis}.
+%and the anonymity of the system.
+Since each account can appear only once as input in a transaction, if two concurrent transactions include the same account in their input set, one of them should be rejected.
+As the number of accounts within the system increases, the probability of a non-empty intersection between two transaction input sets decreases. 
+% // TODO: is this correct? the fixed-key situation
+In addition, creating new accounts allows users to own a fixed key that can be used to receive funds, instead of the key constantly changing. % //TODO: not well-written enough.
+Therefore, it improves the overall communication overhead.
+% //TODO: does this conflict with what we say in the audit anonymity properties?
+% With regard to anonymity, without the ability to create a new account from a constant public key, in our case the recipient's initial public key, the latter would reveal their new account to the sender, and as a result revealing the transaction in which the account is created. 
+% would have to give the current state of the recipients public key
+
+% In order for the $\AA$ to execute the auditing procedure, it should know the total amount of accounts each user owns.
+% Thus, the stable public key for each user is their initial public key stored in $\usersset$, and the creation of a new account increases the number of the accounts held by the selected user. 
+
+New accounts are composed of updates of the initial public key stored in the user's $\userinfo$ and commitments to zero values for the other attributes related to $\varbl, \varout, \varin$. Moreover, $\userinfo$ is updated, by increasing the committed value for the number of accounts the user owns. This is achieved by using the homomorphic property of the commitment scheme. 
+
+In order to hide the $\userinfo$ that corresponds to the user, an anonymity set $\anset$ is used. The values of the commitments of the $\userinfo$ that belong to the anonymity set are re-randomized without changing their committed values. That is, transactions that create new accounts are composed of input and output sets, which both include the intended user's $\userinfo$, and also the newly created account. The $\userinfo$ updates happen through the invocation of the $\upduser$ algorithm, and the outputs set is composed of these updated $\userinfo$.
+
+% Transactions that create new accounts are composed of input and output sets, which both include the intended user and the newly created account. Furthermore, these transactions also include a NIZK proof that both the outputs set and the new account have been computed following the protocol specification.
+
+% The public key of the new account that the algorithm creates is an update of the initial public key of the intended user, and the other attributes related to $\varbl, \varout, \varin$ are commitments to zero values. Moreover, the algorithm updates the user's $\userinfo$ by increasing the committed value for the number of accounts they own. This is achieved by using the homomorphic property of the commitment scheme.  
+
+% In order to hide the identity of the intended user, an anonymity set $\anset$ is used. The values of the commitments of the $\userinfo$ that belong to the anonymity set are re-randomized without changing their committed values.
+
+% The $\userinfo$ updates happen through the invocation of the $\upduser$ algorithm, and the outputs set is composed of these updated $\userinfo$.
+
+% //TODO: do we need \psi here as well? proof of permutation.
+The detailed description of the $\createAcct$ algorithm is depicted in \autoref{fig:createAcct}. It takes as input the $\userinfo$ of the intended user and an anonymity set $\anset$. It returns a transaction $\txnca = (\acct, \inputs, \outputs, \pi)$.
+
+\begin{boxfig}{\label{fig:createAcct}{The $\createAcct$ algorithm.}}
+/ %The algorithm $\txnca \gets \createAcct(\userinfo, \anset)$ performs the following steps:
+The algorithm $\createAcct(\userinfo, \anset)$ performs the following steps:
+\begin{enumerate}
+    \item Pick $r_1, r_2, r_3, r_4 \sample \randspace$ and let $\vec{r} = (r_1, r_2, r_3, r_4)$. Let $\acct = (\pk, \comm{0}, \comm{0}, \comm{0})$ be the output of $\newacc(\userinfo.\inpk; \vec{r})$.
+    \item Let $\inputs = \{\userinfo\} \cup \anset$ in some canonical order. Let $\mathtt{c}, \ianset$ be the indices of the chosen initial public key for which we wish to construct the new account, and the anonymity set in this list. 
+    \item Construct $\vec{\v}$ as follows: $\v_i = 0 \ \forall i \in \ianset$ and $\v_{\mathtt{c}} = 1$. 
+    % //TODO: fix error with \v-although it still compiles :)
+    \item Pick $r_5 \sample \randspace$ and let $\outputs$ be the output of $\upduser(\inputs, \vec{\v} ;r_5)$.
+    \item Form a zero-knowledge proof $\pi$ of the relation $R(x, w)$, where $x=(\acct, \inputs, \outputs), w = (c, \vec{\v}, \vec{r}, r_5)$ and $R(x,w) = 1$ if 
+    $\forall i \in \{\mathtt{c}\} \cup \ianset, \ \userinfo_i \in \inputs, \userinfo'_i \in \outputs$
+     we have that:
+        {\begin{align*}
+            & \verupduser(\userinfo'_i, \userinfo_i, 0;r_5) = 1 \ \forall i \in \ianset \\
+            & \wedge \verupduser(\userinfo'_{\mathtt{c}}, \userinfo_{\mathtt{c}}, 1;r_5) = 1 \\
+            & \wedge \verupd(\acct.\pk, \userinfo_c.\inpk, r_1) = 1\\
+            & \wedge \commit(\acct.\pk, 0; r_2) = \acct.\com_\varbl \\
+            & \wedge \commit(\acct.\pk, 0; r_3) = \acct.\com_\varout 
+             \wedge \commit(\acct.\pk, 0; r_4) = \acct.\com_\varin \\
+        \end{align*}}
+\end{enumerate}
+The final transaction returned by the algorithm is $\txnca = (\acct, \inputs, \outputs, \pi)$.
+\end{boxfig}

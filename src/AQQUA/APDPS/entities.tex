@@ -1,0 +1,16 @@
+\subsection{Entities}
+\begin{itemize}
+    % [1. Why we need users to register
+%   need to connect user pk in the system with real user identity (in order to potentially penalize non-compliant users)]-> intro or registration authority (with the citation)
+    \item \emph{Registration Authority} (\RA): The role of the $\RA$ is to enroll new users into the system. Users register by sending their real-world identity information together with an initial public key that they create on their own.
+    The $\RA$ stores this information off-chain. 
+    All the accounts that transact on behalf of this real-world user will originate from this initial public key, through the mechanism of \autoref{UPK}.
+    The purpose of the registration procedure is essential as it establishes a link between a user's public key and their real identity, to be used for the potential penalization of non-compliant users.
+    
+    \item \emph{Audit Authority} (\AA): 
+    Its role is to initiate the audit procedure in order to verify that users comply with the system's policies. 
+    If a user of the system is found to be non-compliant, the $\AA$ will collaborate with the $\RA$ to enforce the relative penalties.
+
+    \item \emph{Users} (\UU): Users of the system that transact with each other.
+\end{itemize}
+    

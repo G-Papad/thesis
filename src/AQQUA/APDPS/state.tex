@@ -1,0 +1,9 @@
+\subsection{State}
+In AQQUA, the state (denoted $\state$) consists of the following two sets:
+\begin{itemize}
+\item $\utxoset$: A table containing the `unspent' accounts, i.e. the accounts that are recorded as outputs of a valid transaction, but 
+have not (yet) been used as inputs.% in any newer transaction.
+\item $\usersset$: A table containing one tuple for each physical user, which is composed of the user's initial public key and a commitment to the number of accounts owned by the user.
+%  A table containing tuples composed of users' initial public keys and commitments to information necessary to perform auditing.
+% A table containing records of the form  $\userinfo=(\inpk,\comm{\numaccs})$, where $\inpk$ represents the initial public keys of the user, and $\comm{\numaccs}$ is a commitment to the number of accounts controlled by the user in the $\utxoset$.
+\end{itemize}

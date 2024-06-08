@@ -1,0 +1,13 @@
+\section{Overview}
+
+\subsubsection{Objective}
+The proposed solutions in the literature that aim to combine privacy and auditability using a general auditor and not a centralized authority suffer either from limited scalability or does not provide full privacy.
+
+Therefore, we aim to construct an efficient, anonymous, confidential and auditable system that can also support concurrent transactions and maintain a stable state size regardless the number of the user or the transaction history. In order to create such a system we propose AQQUA which augments the Quisquis \cite{fauzi2019quisquis} DPS system by adding a general auditor. Therefore, AQQUA combines the anonymity of Quisquis with the policy expressiveness and regulation of PGC \cite{PGC}. That is, the auditor can execute queries about the upper bound on amount the user sent/received in a period of time, non-participation of a user in a specific transaction or period of time, as well as the exact value sent/received in a transaction.
+
+We chose to augment Quisquis, since, as it is already mentioned, it is a fully private system, offering both anonymity and confidentiality, while it has a constant storage cost with respect to the number of transactions. In addition, due to the fact that the anonymity set that uses in order to hide the participants of a transaction does not include all the users of the system, as in zkLedger, Quisquis can support concurrent transactions. 
+
+\subsubsection{Challenges}
+Designing AQQUA required to overcome the following key challenge, enabling auditing functionalities while still users preserve their privacy. Because of the anonymity property, user can hide their accounts and as a consequence the necessary amounts for the auditing procedure. In addition, since Quisquis is permissionless and private, an authority cannot enforce some effective penalties for non-compliant users. 
+
+To overcome this challenge, we introduce a registration functionality to Quisquis through a Registration Authority. That is, users must first register to the systems and provide their real-world credentials. Afterward, they can create new unlinkable accounts that will be used in order to transact within the system. The registration functionality provides a way for the system to know the users that utilize the system as well as to penalize them outside of the system scope. In addition, AQQUA splits the state into two sets. It keeps the UTXO set used in Quisquis that contains the unspent accounts of the user, but also adds a new set that contains the public registration information of users along with necessary information in order to ensure that users cannot hide information during the audit procedure.

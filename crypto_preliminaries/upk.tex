@@ -1,0 +1,77 @@
+\section{Updatable Public Keys} \label{UPK}
+
+Updatable Public Keys (UPK) are first introduced in Quisquis ~\cite{fauzi2019quisquis}.\\
+The concept of an UPK scheme is that public keys can be updated to new ones without changing the underlying secret key. 
+In other words, the updated public key and the original secret key are still a valid key-pair.
+A UPK scheme is a tuple of algorithms $(\setup, \kgen, \upd, \verkp, \verupd)$ where: 
+
+\begin{itemize}
+    \item $\params \sample \setup(\secpar)$: takes as input the security parameter $\secpar$ and generates the public parameters, which are given implicitly as input to all other algorithms. 
+    \item $(\pk, \sk) \sample \kgen(\params)$: generates a key-pair $(\pk,\sk)$. 
+    \item $(\{\pk'\}_{i=1}^n) \sample \upd(\{\pk\}_{i=1}^n)$: takes as input a set of public keys $\{\pk\}_{i=1}^n$ and generates a new set $\{\pk'\}_{i=1}^n$.
+    \item $(0/1) \gets \verkp(\pk, \sk)$: takes as input a keypair $(\sk, \pk)$ and checks if it is valid, i.e. if $\pk$ corresponds to $\sk$.
+    \item $(0/1) \gets \verupd(\pk', \pk, r)$: takes as input a pair of public keys and some randomness $(\pk', \pk, r)$ and checks if $\pk'$ is a valid update from $\pk$ using $r$.
+\end{itemize}
+
+An UPK scheme must satisfy the following intuitive properties:
+\begin{itemize}
+    \item \textbf{Correctness}: All honestly generated keys verify correctly, the update process can be verified and the updated keys also verify successfully.
+    \begin{align*}
+        & \forall (\pk,\sk) \in [\kgen(\params)]: \\
+        & \verkp(\pk,\sk) = 1 \\
+        & \land \verupd(\upd(\pk;r), \pk, r) \ \forall r\in R\\
+        & \land \verkp(\pk',\sk) \ \forall \pk' \in [\upd(\pk)]
+    \end{align*}
+
+    \item \textbf{Indistinguishability}, meaning that an adversary cannot distinguish between a freshly generated public key and an updated version of public key it already knows. \\
+    The indistinguishability game is presented in \autoref{alg:indistinguishability-game}.
+% -------- Indistinguishability security game -------
+    \begin{algorithm}[h!]
+        \DontPrintSemicolon
+        \SetAlgoLined
+        \caption{Indistinguishability game $\exper^{\indistinguishability}_{\adv}(\secpar)$}
+        \label{alg:indistinguishability-game}
+        \SetKwInOut{Input}{Input}
+        \SetKwInOut{Output}{Output}
+        \Input{$\secpar$}
+        \Output{$\{0,1\}$}
+        \BlankLine
+    
+        $b\gets \{0, 1\}$ \;
+        $(\pk^{*}, \sk^{*}) \sample \kgen(\params)$ \;
+        $\pk_0 \sample \upd(\pk^{*})$ \;
+        $(\pk_1, \sk_1) \sample \kgen(\params)$ \;
+        $b' \gets \adv(\pk^{*}, \pk_b)$ \;
+        \Return{$(b = b^\prime)$}
+    \end{algorithm}    
+    % -------- End indistinguishability security game -------
+
+    UPK satisfies \emph{indistinguishability} if for every PPT adversary $\adv$, $\advantage{\indistinguishability}{\adv}$ is negligible in  $\secpar$.
+    
+    The \emph{advantage} of the adversary in winning the indistinguishability game is defined as:
+    \begin{equation*}
+        \advantage{\indistinguishability}{\adv} = \mid \Pr[\exper^{\indistinguishability}_{\adv}(\secpar)=1] - \dfrac{1}{2} \mid
+    \end{equation*}
+
+
+    \item \textbf{Unforgeability}, meaning that for every honestly generated keypair an adversary cannot learn the secret key of an updated public key without knowing the secret key of the original public key. \\
+    UPK satisfies \emph{unforgeability} if for any PPT adversary $\adv$:
+    \begin{align*}
+        Pr[\verkp(\pk', \sk') = 1 \land \verupd(\pk', \pk, r) = 1 \\
+        | (\pk,\sk) \sample \kgen(\params); (\sk', \pk', r) \sample \adv(\pk)] \leq negl(\secpar)
+    \end{align*}
+\end{itemize}
+
+UPK scheme can be constructed based over a prime-order group $(\group, g, p)$ where the $\ddh$ assumption is believed to hold. 
+\begin{itemize}
+    \item $\kgen(\params)$: Sample $r, \sk \sample \mathbb{F}_p$, calculate $\pk = (g^r, g^{r \dot \sk})$ and output $(\sk,\pk)$.
+    \item $\upd(\{ \pk_i \}_{i=1}^n, r)$: Output $\{ \pk'_i \}_{i=1}^n$ where $\pk'_i = \pk_i ^ r = (g_i^r, g_i^{r \cdot sk})$ for all $i$.
+    \item $\verkp(\sk,\pk)$: Parse $\pk=(g',h')$ and output $(g')^\sk \overset{?}{=} h'$.
+    \item $\verupd(\pk', \pk, r)$: Output $\upd(\pk;r) \overset{?}{=} \pk'$.
+\end{itemize}
+
+% \begin{lemma}
+%     If the $\ddh$ assumption holds in $(\group, g, p)$ then this construction satisfies correctness, indistinguishability and unforgeability.    
+% \end{lemma}
+
+

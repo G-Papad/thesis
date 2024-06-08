@@ -1,0 +1,12 @@
+\subsubsection{Twisted El Gamal}
+\label{TwistedElGamal}
+
+The differences between ElGamal and twisted ElGamal encryption is that in the latter: (i) the message is encoded over another generator $h$ that the logarithmic relation with $g$ is unknown (ii) the key encapsulation and session key are switched. It is been proved in \cite{PGC} that is as secure and efficient as standard ElGamal as well as it's ciphertext can be used as direct input to bulletproofs.
+
+More specifically twisted ElGamal consists of the following algorithms:
+\begin{itemize}
+    \item $\setup(1^\lambda)$: run $(\group, g, p) \gets \groupgen(1^\lambda)$, pick $h \sample \group^*$, set $pp = (\group, g,h,p)$.
+    \item $\kgen(pp)$: choose $\sk \sample \ZZ_p$, set $\pk = g^\sk$. 
+    \item $\enc(\pk,\msg;r)$: compute $X = \pk^r, Y=g^r h^m$, output $C=(X,Y)$.
+    \item $\dec(\sk, C)$: parse $C=(X,Y)$, compute $h^m = Y/X^{sk^{-1}}$. Recover $m$ from $h^m$. 
+\end{itemize}

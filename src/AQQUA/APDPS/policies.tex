@@ -1,0 +1,111 @@
+\subsection{Policies}
+\label{ssec:Policies}
+% // TODO: fix alignment!!
+An auditable DPS should support a rich set of compliance policies.
+They can be captured as predicates over an initial public key $\inpk$, a time period represented by a starting state $\state_1$ and an ending state $\state_2$, and auxiliary information $\aux$ which is dependent on an specific compliance goal. In all the policy predicates, we use the notation $A_1, A_2$ to denote the set of accounts in $\snap_1.\utxoset, \snap_2.\utxoset$ that are owned by the owner of $\inpk$.
+
+\begin{itemize}
+    \item Sending limit policy $f_{\sendlimit}$: The total amount a real-world user can send within a specific period. It can be determined by the $\AA$ off-chain and announced to the user for a specific period, depending on the application. The $\snap_1, \snap_2$ are the states of the blockchain at the beginning and end of the period, respectively.
+    % // TODO: write somewhere that this can be used for anti-money laundering, i.e. "i know that someone sent 100k to fund some activity, prove to me that you are not them.
+    \begin{align*}
+        f_{\sendlimit}(\inpk, (\snap_1, \snap_2), \srlimit) = 1 \iff 
+        \left\{ \begin{aligned}
+                            &  \left(\sum_{\acct\in A_2}{\varout} - \sum_{\acct \in A_1}{\varout} \right)
+                            \leq \srlimit 
+                 \end{aligned} \right\}
+    \end{align*}
+    where $\varout$ is the opening of $\comm{\varout}$ of an account $\acct$, using the account's secret key $\sk$.
+    \item Receiving Limit policy $f_{\receivelimit}$: Similarly, the total amount a `physical' user can receive from other accounts.
+        \begin{align*}
+           f_{\receivelimit}(\inpk, (\snap_1, \snap_2), \srlimit) = 1  \iff 
+           \left\{ \begin{aligned} 
+                    & \left(\sum_{\acct\in A_2}{\varin} - \sum_{\acct \in A_1}{\varin}\right) \leq \srlimit
+            \end{aligned} \right\}
+        \end{align*}
+        where $\varin$ is the opening of $\comm{\varin}$ for account $\acct$, calculated using the account's secret key $\sk$.
+
+        % ---- begin tax policy(removed) ----
+        % \item Tax policy $f_{\rate}$: A portion $\rho$ of the transferred amount in a transaction is sent to the tax office, where $\rho$ is an application-dependent rate. We assume that $\rho=\alpha/\beta$, where $\alpha,\beta$ are two integers. Here, $\snap_1, \snap_2$ are the states before and after the user's transaction is applied, respectively.
+        % % // TODO: write a description once we settle with tax.
+        % % Each transaction is taxed at a predetermined rate $\rho$.
+        % \begin{align*}
+        %     f_{\rate}(\inpk, (\snap_1, \snap_2), \alpha, \beta) = 1 \iff 
+        %     \left\{ \begin{aligned}  
+        %         % & \forall \acct \in A_1\cup A_2, \verkp(\sk, \acct.\pk)=1 \land  \\
+        %         % & \rho = \alpha / \beta \land \\
+        %         % &  \frac{\sum_{\acct\in A_2}{\varin} - \sum_{\acct \in A_1}{\varin}}{\acct_{\taxoffice}^{A_2}.\varbl - \acct_{\taxoffice}^{A_1}.\varbl} = \frac{1}{\rho}
+        %         & \alpha \cdot \left( \sum_{\acct\in A_2}{\varin} - \sum_{\acct \in A_1}{\varin} \right) = \\
+        %          &\beta \cdot \left( \acct_{\taxoffice}^{A_2}.\varbl - \acct_{\taxoffice}^{A_1}.\varbl \right) 
+        %     \end{aligned} \right\}
+        % \end{align*}
+        % where $\acct_{\taxoffice}$ the predetermined address of tax office.
+        % ---- end tax policy(removed) ----
+        % where $\varin$ is the opening of $\comm{\varin}$ of an account $\acct$ using the account's $\sk$ and $\vtof$ is a value send to the tax office.
+
+        % If we want the tax policy to be between two txns
+        % \begin{multline*}
+        %     f_{\rate}(\sk, \txn, \rho) = 1 \iff \\
+        %     \exists \acct_s \in \txn.\inputs, \verkp(\sk, \acct_s.\pk)=1 \land \\ 
+        %     \exists \acct'_s \in \txn.\outputs, \verkp(\sk, \acct_s.\pk)=1 \land \\
+        %     v = \acct_s.bl - \acct'_s.bl \in \vset \land \\
+        %     \acct_{to} \in \txn.\inputs \land \acct'_{to} \in \txn.\outputs \land \\
+        %     \frac{v}{\acct'_{to}.bl - \acct_{to}.bl} = \frac{1}{\rho},
+        % \end{multline*}
+
+        \item Open policy $f_{\open}$: The value of the amount sent or received by a user in a transaction.
+        % \begin{align*}
+        %     f_{\open}(\sk, \txn, v_{\open}) = 1 \iff 
+        %     \left\{ \begin{aligned}   
+        %     & \text{ if } S=\{ \acct \in \txn.\inputs \mid \verkp(\sk, \acct.\pk)=1 \} \\ 
+        %     & \text{ and } S^\prime =\{ \acct^\prime \in \txn.\outputs \mid \verkp(\sk, \acct^\prime.\pk)=1 \} \\
+        %     & \text{ we have that } \\
+        %     & v = \left(\sum_{\acct \in S^\prime}\varbl - \sum_{\acct \in S}\varbl \right)\in \vset \lor v = \left(\sum_{\acct \in S}\varbl - \sum_{\acct \in S^\prime}\varbl \right)\in \vset \\
+        %     & \land v = v_{\open} 
+        % \end{aligned} \right\}
+        % \end{align*}
+        \begin{align*}
+            f_{\open}(\inpk, (\snap_1, \snap_2), v_{\open}) = 1 \iff 
+            \left\{ \begin{aligned}   
+                % & \forall \acct \in A_1 \cup A_2, \verkp(\sk, \acct.\pk)=1 \land \\
+                % //TODO: the parenthesis could be bigger- its (a or b) and c -that's why we need it!
+            & (v = \left(\sum_{\acct \in A_{2}}\varbl - \sum_{\acct \in A_{1}}\varbl \right)\in \vset \\
+            &\lor v = \left(\sum_{\acct \in A_{1}}\varbl - \sum_{\acct \in A_{2}}\varbl \right)\in \vset )\\
+            & \land v = v_{\open} 
+        \end{aligned} \right\}
+        \end{align*}
+        where $\varbl$ is the opening of $\comm{\varbl}$ of an $\acct$.
+
+        \item Transaction Value Limit $f_{\txnlimit}$: Upper bound to the total transferred amount that can be sent in a transaction.
+        \begin{align*}
+            f_{\txnlimit}(\inpk, (\snap_1, \snap_2), v_{\max}) = 1 \iff  
+            \left\{ \begin{aligned} 
+            % & \text{ if } S=\{ \acct \in \txn.\inputs \mid \verkp(\sk, \acct.\pk)=1 \} \\ 
+            % & \text{ and } S^\prime =\{ \acct^\prime \in \txn.\outputs \mid \verkp(\sk, \acct^\prime.\pk)=1 \} \\
+            % & \text{ we have that } \\
+            & v = \left(\sum_{\acct \in A_1}\varbl - \sum_{\acct \in A_2}\varbl \right) \leq v_{\max} 
+            \end{aligned} \right\}
+        \end{align*}
+        
+        \item Non-participation $f_{\nonpart}$: Non-participation in a specific transaction $\txn$ or inactivity of the user for a time period. The states $\snap_1, \snap_2$ are the states before and after a transaction is applied or at the beginning and end of the period.
+        \begin{align*}
+            f_{\nonpart}(\inpk, (\snap_1, \snap_2)) = 1 \iff  
+            \left\{ 
+                \begin{aligned} 
+                    % \land & \left(\sum_{\acct \in A_{1}}\varbl - \sum_{\acct \in A_{2}}\varbl \right) = 0 \\
+                    \land & \left(\sum_{\acct \in A_{1}}\varout - \sum_{\acct \in A_{2}}\varout \right) = 0 \\
+                    \land &\left(\sum_{\acct \in A_{1}}\varin - \sum_{\acct \in A_{2}}\varin \right) = 0
+                \end{aligned} 
+            \right\}
+        \end{align*}
+
+        % TODO: do we want blacklist? can we just check if pk0 is in userset?
+        % TODO: Remove blacklist predicated
+        % \item Blacklist $f_{\blacklist}$: Exclusion from set of initial public key of users who are not compliant with the system's policies.
+        % \begin{align*}
+        %     f_{\blacklist}(\sk, \usersset, \blist) = 1 \iff 
+        %     \left\{ \exists \inpk \in \usersset \smallsetminus \blist \land \verkp(\sk, \inpk) \right\}
+        % \end{align*}
+         
+\end{itemize}
+
+% These information needed for each policy $(\srlimit, \rho)$ is included in the corresponding algorithms implementing these policies in the $\aux$ variable.

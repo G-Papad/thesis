@@ -1,0 +1,91 @@
+% \section{Proof System}
+
+In order to implement the proof system of zero-knowledge arguments we use the following $\Sigma$-protocols defined in \cite{fauzi2019quisquis} as well as $\Sigma$-protocols for discrete logarithm equality due to Chaum and Pedersen. For completeness we describe it below.
+
+% Define the language $L_{ddh}$ as:
+% {
+%     \begin{align*}
+%         L_{ddh} = \{ (g_1, h_1, g_2, h_2) \ \vline \ \exists w \in \ZZ_p \text{ s.t. } \log_{g_1} h_1 = w = \log_{g_2} h_2 \}
+%     \end{align*}
+% }
+
+% Define the language $L_{dlog}$ as:
+% {
+%     \begin{align*}
+%         L_{dlog} = \{ (g,h) \ \vline \ \exists w \in \ZZ_p \text{ s.t. } h = g^w \}
+%     \end{align*}
+% }
+
+\begin{itemize}
+    \item $\Sigma_{vu}$: proof a valid update. Prover shows knowledge of $w$ such that $\pk' = pk^w$.
+
+    \begin{center}
+        \begin{tabular}{ |l c l| }
+         \hline
+         \textbf{Prover}($\pk, \pk', w$) &  & \textbf{Verifier}($\pk, \pk'$) \\
+         $s \sample \mathbb{F}_p$ & & \\
+         $\alpha \leftarrow \pk^s = (g^s, h^s)$ & $\xlongrightarrow{\alpha}$ & \\ 
+         & $\xlongleftarrow{c}$ & $c \sample \{0,1\}^{\kappa}$ \\
+         $z \leftarrow cw+s$ & $\xlongrightarrow{z}$ & \\
+         & & Check $\pk^z =  (\pk')^c \cdot \alpha$ \\
+         \hline
+        \end{tabular}
+    \end{center}
+
+    \item $\Sigma_{com}:$ proof of knowledge of two commitments of the same value $v$ under different public keys. Prover shows knowledge of $w=(v,r_1,r_2)$ such that $\com_1 = \commit(\pk_1, v;r_1), \com_2 = \commit(\pk_2, v;r_2)$.
+
+    \begin{center}
+        \begin{tabular}{ |l c l| }
+         \hline
+         & $\pk_1 = (g_1, h_1), \com_1 = (c_1, d_1)$ & \\ 
+         & $\pk_2 = (g_2, h_2), \com_2 = (c_2, d_2)$ & \\
+         \textbf{Prover}$(v,r_1,r_2)$ &  & \textbf{Verifier} \\
+         $v',r'_1,r'_2 \sample \mathbb{F}_p$ & & \\
+         $(e_1,f_1) \leftarrow (g_1^{r'_1}, g^{v'}h_1^{r'_1})$ & & \\
+         $(e_2,f_2) \leftarrow (g_2^{r'_2}, g^{v'}h_2^{r'_2})$ & $\xlongrightarrow{\alpha}$ & \\ 
+         & $\xlongleftarrow{x}$ & $x \sample \{0,1\}^{\kappa}$ \\
+         $(z_v, z_{r1}, z_{r_2}) \leftarrow x(v,r_1,r_2) + (v', r'_1, r'_2)$ & $\xlongrightarrow{(z_v, z_{r1}, z_{r_2})}$ & \\
+         & & Check for $i = 1,2$:\\
+         & & $g_i^{z_ri} = c_i^x \cdot e_1$\\
+         & & $g^{z_v} h_i^{z_ri} = d_i^x \cdot f_i $ \\
+         \hline
+        \end{tabular}
+    \end{center}
+
+    % \item $\Sigma_{open}:$ proof of the opening of a commitment has a specific value. 
+\end{itemize}
+
+\input{src/AQQUA/appendix/trans_proof.tex}
+
+\subsection{zk-proof of Audit and Register}
+Both the $\reg$ and $\audit$ functionalities need a zero-knowledge proof for the statements: 
+\begin{itemize}
+    \item $\verkp(\pk,\sk)$: prover shows knowledge of a valid $(\pk, \sk)$ key-pair. 
+    The corresponding language can be written as:
+    {\begin{align*}
+        L_{vu} := \{ pk = (X = g^r, Y = g^{r \cdot sk}) \ \vline \ \exists \sk \text{ s.t. } \ Y = X^\sk \}
+    \end{align*}}
+    That can be proven through $\Sigma_{dlog}$ with arguments $(X, Y, \sk)$.
+    \item $\vercom(\pk, \com, \sk, v)$: prover shows knowledge of secret key $\sk$ that opens the commitment $\com$ to value $v$. The corresponding language can be written as:
+    {
+     \begin{align*}
+        L_{open(sk)} := \{ (\com = (X = h^r, Y = g^v h^{sk \cdot r}), v) \ \vline \ \exists \sk \text{ s.t. } \ Y/g^v = X^\sk  \}
+     \end{align*}   
+    }
+    That can be proven through $\Sigma_{dlog}$ with arguments $(X, Y/g^v, \sk)$.
+
+    % \item Prover want show knowledge of the value $v$ inside of commitment without knowing the secret key of commitment $\sk$ but knows the randomness $r$ used (it is used for example in $\createAcct$):
+    % {
+    %     \begin{align*}
+    %         L_{open(r,v)} := \{ (\pk = (h,h^\sk), \com = (X = h^r, Y = g^v h^{sk \cdot r}), v) \ \vline \ \exists r \text{ s.t. } \ \pk^r = (X, Y/g^v)  \}
+    %     \end{align*}
+    %     That can be proven through $\Sigma_{vu}$ with arguments $(\pk, (X,Y/g^v), r)$.
+    % } 
+\end{itemize}
+
+The proof needed for $\reg$ results from the composition of these $\Sigma$-protocols and a range proof for showing that $bl \in \vset$. 
+
+The $\audit$ proof uses the same combination of these $\Sigma$-protocols and appropriate range proofs for 
+each policy $f_\sendlimit , f_\receivelimit , f_\open , f_\txnlimit , f_\nonpart$. 
+% --- removed -tax policy
+% For the tax policy we can prove $f_\rate$ statement through the $\Sigma_{com}$ protocol.

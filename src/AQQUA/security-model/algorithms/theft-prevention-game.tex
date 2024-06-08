@@ -1,0 +1,30 @@
+% -------- Theft prevention security game -------
+\begin{game}[h]
+    \DontPrintSemicolon
+    \SetAlgoLined
+    \caption{Theft prevention game $\exper^{\theftprevention}_{\adv}(\secpar)$}
+    \label{alg:theftprevention}
+    
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{$\secpar$}
+    \Output{$\{0,1\}$}
+    \BlankLine
+
+    % $\vec{\varbl} \gets \adv(\secpar)$ \;
+    % $(\state, \vec{\sk}) \gets \setup(\secpar, \vec{\varbl}) $ \;
+    % $\bookkeepingfunctionality.\initbookkeeping(\vec{\sk})$ \; % //
+    $(\instate, \params) \gets \setup(\secpar) $ \;
+    $\txn \gets \adv^{\corruptOracle, \regOracle, \createAcctOracle, \deleteAcctOracle, \transOracle, \applytxnOracle}(\instate)$  \;
+    $\state \gets \stateslist[-1]$ \tcp*{most recent state of bookkeeping}
+    $s_h \gets \countwealth(.\honest, \state)$ \;
+    $s_c \gets \countwealth(\corrupt, \state)$ \;
+    \If{$\vertxn(\txn, \state) = 0$}{
+        \Return{$\bot$}
+    }
+    $\state^{\prime } \gets \applytxn(\txn, \state)$ \;
+    $s_h^\prime \gets \countwealth(\honest, \state^\prime)$ \;
+    $s_c^\prime \gets \countwealth(\corrupt, \state^\prime)$ \;
+    \Return{$(s_h^\prime < s_h) \lor (s_c^\prime > s_c) \lor (s_c^\prime + s_h^\prime \neq s_c + s_h)$}
+\end{game}
+% -------- End theft prevention security game -------

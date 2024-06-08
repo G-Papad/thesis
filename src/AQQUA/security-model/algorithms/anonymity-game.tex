@@ -1,0 +1,49 @@
+% -------- Anonymity security game -------
+\begin{game}[htbp]
+    \DontPrintSemicolon
+    \SetAlgoLined
+    \caption{Anonymity game $\exper^{\anonymity}_{\adv}(\secpar)$}
+    \label{alg:anonymity-game}
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+    \Input{$\secpar$}
+    \Output{$\{0,1\}$}
+    \BlankLine
+
+    $b\gets \{0, 1\}$ \;
+    $(\instate, \params) \gets \setup(\secpar) $ \;
+    $(\acct_0, \acct_1, \acct^\prime_0, \acct^\prime_1, \anset, v_0, v_1)\gets \adv^{\corruptOracle, \regOracle, \createAcctOracle, \deleteAcctOracle, \transOracle, \applytxnOracle}(\instate)$ \;
+    $\state \gets \stateslist[-1]$ \tcp*{most recent state of bookkeeping}
+    $\sk_0 \gets \findsecretkey(\acct_0.\pk, \state);$ 
+    $\sk_1 \gets \findsecretkey(\acct_1.\pk, \state)$ \;
+    $\sk^\prime_0 \gets \findsecretkey(\acct^\prime_0.\pk, \state);$
+    $\sk^\prime_1 \gets \findsecretkey(\acct^\prime_1.\pk,\state)$ \;
+    \If{$(\sk_0 \in \corrupt \lor \sk_1\in\corrupt) % one of the senders is corrupt
+    \lor ((\sk_0^\prime \in \corrupt \lor \sk_1^\prime \in \corrupt) % one of the receivers is corrupt
+    \land 
+    ((\acct^\prime_0\neq \acct^\prime_1) \lor(\acct^\prime_0 = \acct^\prime_1 \land v_0\neq v_1 ) ))
+    % abort if: accounts are different (adv would know if they have received money or not
+    % accounts are the same, but amounts are not the same (adv would know the sender)
+    \lor (\acct_0.\varbl < v_0 \lor \acct_1.\varbl < v_1) $ % accounts have insufficient balance
+    }{
+        \Return{$\bot$}
+    }
+    \For{$y\in\{0,1\}$}{
+        $\anset_y \gets \anset $\;
+        \If{$\sk_0\neq \sk_1$}{
+            $\anset_y \gets \anset \cup \{\acct_{1-y} \}$
+        } 
+        \If{$\sk^\prime_0 \neq \sk^\prime_1$}{
+            $\anset_y \gets \anset \cup \{\acct^\prime_{1-y} \}$
+        } 
+        $\txn_y \gets \trans(\sk_y, \{\acct_y\}, \{ \acct^\prime_y\}, (-v_y), (v_y), \anset_y$) \; % \\TODO: sanity check
+        \If{$\vertxn(\txn_y, \state) =0 $}{
+            \Return{$\bot$}
+        }
+    }
+    $\state^\prime \gets \applytxn(\txn_b, \state)$ \;
+    $ b^\prime \gets \adv(\state^\prime) $ \;
+    \Return{$(b = b^\prime)$} 
+\end{game}
+
+% -------- End anonymity security game -------

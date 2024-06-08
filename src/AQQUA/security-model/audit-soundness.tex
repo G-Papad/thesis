@@ -1,0 +1,13 @@
+\subsection{Audit soundness}
+
+In order for the adversary to win the audit soundness game for a policy $f$, they have to output a valid audit proof for a user that is non-compliant regarding the particular policy. The audit soundness game is presented in Game \ref{alg:audit-soundness-game}.
+\input{src/AQQUA/security-model/algorithms/audit-soundness-game.tex}
+\begin{definition}\label{def:audit-soundness}
+    The \emph{advantage} of the adversary in winning the audit soundness game for policy $f$ is defined as:
+    $
+        \advantage{\auditsoundness}{\adv, f} = \Pr[\exper^{\auditsoundness}_{\adv, f}(\secpar)=1]
+    $
+    A DPS satisfies \emph{audit soundness} for a policy $f$ if for every PPT adversary $\adv$, $\advantage{\auditsoundness}{\adv, f}$ is negligible in  $\secpar$.
+\end{definition}
+
+

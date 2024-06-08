@@ -1,0 +1,38 @@
+\subsection{User information}
+Each real-world user is associated with a tuple $\userinfo=(\inpk,\comm{\numaccs})$, stored in the $\usersset$.
+The public key $\inpk$ is an initial public key provided at the time of registration. 
+The public key of every account owned by the user will share the same secret key with $\inpk$.
+
+The value $\numaccs$ is the number of accounts in the $\utxoset$ that are owned by the user, and is stored as a commitment so that it remains hidden. 
+Keeping track of the number of accounts a user owns is necessary in order to support  policies related to value limits, such as the total amount a user has received or sent in a period of time. Otherwise, such policies could be easily bypassed through the creation of sybil identities~\cite{SokAuditability}.
+ The opening of the commitment $\comm{\numaccs}$ will be revealed only to the $\AA$ during the auditing procedure.
+
+The following functions create, verify and update $\userinfo$ entries of the $\usersset$.
+
+\begin{itemize}
+    % TODO: Add comment to explain where the initial balance comes from
+    \item $(\sk, \userinfo, \acct) \gets \genuser()$: Picks $r_1, r_2, r_3, r_4, r_5 \sample \randspace$ and let $\vec{r} = (r_1, r_2, r_3, r_4)$. Then runs $(\sk, \inpk)\gets \kgen()$, $\acct \gets \newacc(\inpk; \vec{r})$, calculates the tuple $\userinfo = (\inpk, \commit(\inpk, 1;r_5))$  and returns
+    $(\sk, \userinfo, \acct)$.
+    % \item $(\sk, \userinfo, \acct) \gets \genuser(\varbl)$: Picks $r_1, r_2, r_3, r_4, r_5 \sample \randspace$ and let $\vec{r} = (r_1, r_2, r_3, r_4)$. Then runs $(\sk, \inpk)\gets \kgen()$, $\acct \gets \newacc(\inpk, \varbl; \vec{r})$ and returns
+    % \begin{equation*}
+    %     (\sk, \userinfo = (\inpk, \commit_{\inpk}(1;r_5)), \acct)
+    % \end{equation*}
+    
+    \item  $0/1 \gets \veruser((\inpk, \com), (\sk, \numaccs))$: outputs 1 if 
+   $
+        \vercom(\sk, \inpk, \com, \numaccs)
+        \land (\numaccs \in \vset)
+    $
+
+    % //TODO: fix indexing (for i)- is it pk_0_i (index on 0) or (pk_0)_i so i is next to pk_0?
+    \item $\{\userinfo'_i\}_{i=1}^n \gets \upduser(\{\userinfo_i, {\vnumaccs}_i\}_{i=1}^n; r)$ takes as input a set of user-value pairs where $\userinfo_i = (\pk_{0_i},\com_{\numaccs i})$ and ${\vnumaccs}_i \in \vset$ and outputs a new set of users $\{\userinfo'_{i}\}_{i=1}^n = \{(\pk_{0_i}, \com_{\numaccs i}^\prime)\}_{i=1}^n$ 
+    where 
+    \begin{equation*}
+        \com_{\numaccs i}^\prime = \com_{\numaccs i} \odot \commit(\inpk, \vnumaccs;r)
+    \end{equation*}
+
+    \item $0/1 \gets \verupduser(\{\userinfo'_i, \user_i, {\vnumaccs}_i\}_{i=1}^n; r)$ outputs 1 if
+    \begin{equation*}
+        \{\userinfo'\}_{i=1}^n = \upduser(\{\userinfo_i, {\vnumaccs}_i\}_{i=1}^n; r) \land (\vnumaccs \in \vset)
+    \end{equation*}
+\end{itemize}

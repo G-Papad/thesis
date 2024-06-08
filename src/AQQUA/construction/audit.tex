@@ -1,0 +1,86 @@
+\subsubsection{Audit Algorithm}
+
+% //TODO: selects the policy
+In the audit procedure, the $\AA$ selects a user by their initial public key $\inpk$ and a time period which is represented by two snapshots of the blockchain $(\snap_1, \snap_2)$. For the policies that are applied to transactions (namely $ f_\txnlimit, f_\open$), the snapshot $\snap_2$ should be the state that results from applying the transaction to $\snap_1$. In the case where the policy is applied to a specified period (for example in $f_\sendlimit, f_\receivelimit, f_\nonpart$), the snapshots $\snap_1, \snap_2$ should be the states right before the beginning and after the end of the period, respectively.
+
+The user which participates in the auditing should open for each of the two snapshots the committed value of the number of accounts they own ($\comm{\numaccs}$ field of $\userinfo$). Then, they should reveal their accounts in each of the two snapshots' $\utxoset$. The number of accounts they reveal in each snapshot should be equal to the opening of the corresponding commitment.
+Revealing the accounts does not hurt the anonymity of the user, since from the indistinguishability property of the UPK scheme and the hiding property of the commitment scheme, the $\AA$ cannot link the accounts that will be revealed with updated versions of them that will appear as a result of the user participating in any new transaction.
+
+After opening the commitment and revealing the account, the user creates a zero-knowledge proof that the sets of accounts satisfy the required policy predicate, as defined in \autoref{ssec:Policies}.
+
+The detailed description of the $\audit$ algorithm is depicted in \autoref{fig:audit}. It takes as input the user's secret key $\sk$, the two blockchain snapshots $(\snap_{1}, \snap_{2})$, and the policy $f$ along with the necessary information $\aux$.
+
+\begin{boxfig}{\label{fig:audit}{The $\audit$ algorithm.}} 
+/ The algorithm 
+% ($\pi, {\numaccs_1}, \{ {\acct_1}_{i} \}_{i=1}^\numaccs, {\numaccs_2}, \{ {\acct_2}_{i} \}_{i=1}^\numaccs) \gets \audit(\sk,  \snap_{1}, \snap_{2}, (f, \aux))$ \\
+$\auditinfo \gets \audit(\sk, \inpk, \snap_{1}, \snap_{2}, (f, \aux))$ 
+performs the following steps: 
+% //TODO: write something different for blacklist
+\begin{enumerate}
+
+    \item Ensure that $\verkp(\sk, \inpk)$. For each snapshot $\snap_j, j =1,2$ find the $\userinfo_j$ that contains $\inpk$, and calculate $\numaccs_j = \opencom(\sk, \userinfo.\comm{\numaccs_j})$
+    
+    % $\forall \userinfo \in \snap_j.\usersset$, if $\verkp(\userinfo.\inpk, \sk) = 1$ then $\userinfo_j = \userinfo = (\inpk, \comm{\numaccs_j})$ and calculate $\numaccs_j = \opencom(\sk, \comm{\numaccs_j})$.
+    % \item For each snapshot $\snap_j$ find the $\userinfo_j$ that corresponds to the owner of $\sk$. That is, $\forall \userinfo \in \snap_j.\usersset$, if $\verkp(\userinfo.\inpk, \sk) = 1$ then $\userinfo_j = \userinfo = (\inpk, \comm{\numaccs_j})$ and calculate $\numaccs_j = \opencom(\sk, \comm{\numaccs_j})$.
+   
+    \item For each snapshot find the set of accounts $A_j= \{\acct_i\}_{i=1}^{\numaccs_j}$ that belong to the user. That is, $\forall \acct \in \snap_j.\utxoset$,  if $\verkp(\acct.\pk, \sk) = 1$, then add $\acct$ to $A_j$.
+   
+    \item Form a zero-knowledge proof  $\pi_1$ of the relation $R(x,w)$, where
+    $x=(\inpk, \{ \numaccs_j, {\comm{\numaccs_{j}}}, \{ \acct_{ji} \}_{i=1}^{\numaccs_j}\}_{j=1}^{2}), w=(\sk)$ and $R(x,w) = 1$ if:
+        {\begin{align*}
+            & \vercom(\inpk, \comm{\numaccs_j}, (\sk, \numaccs_j)) = 1 \ \forall j \in \{1,2\} \\
+            & \wedge \verkp(\inpk, \sk)=1 \\
+            & \wedge \verkp(\acct_{ji}.\pk, \sk)=1 \ \forall i \in \{1,\dots, \numaccs_j\}, \ \forall j \in \{1,2\} \\
+            % & \wedge \verkp({\pk_j}_i, \sk)=1 \ \forall i \in \numaccs_j, \ \forall j \in \{1,2\} \\ 
+        \end{align*} }
+   
+   \item[]
+    {
+        If $f \in \{f_{\sendlimit}, f_{\receivelimit}, f_{\nonpart}\}$ then:
+        \begin{enumerate}
+            \item[4.] For each snapshot calculate $\comm{\varout^{*}_{j}} = \prod_{i=1}^{\numaccs_j} {\acct_{ji}.\comm{\varout}}, \comm{\varin^{*}_{j}} = \prod_{i=1}^{\numaccs_j} {\acct_{ji}.\comm{\varin}}$. 
+            
+            Then calculate $\comm{\varout^*} = \comm{\varout^*_2}\cdot \left(\comm{\varout^*_1}\right)^{-1}$, $\comm{\varin^*} = \comm{\varin^*_2}\cdot \left(\comm{\varin^*_1}\right)^{-1}$.
+
+            Finally, calculate $\varout^* = \opencom(\sk, \comm{\varout^*}), \varin^* = \opencom(\sk, \comm{\varin^*})$.
+            These values represent the total amount of coins that the user spent/received in the selected period of time.
+            \item[5.] Form a zero-knowledge proof  $\pi_2$ of the relation $R(x,w)$ where
+             $x=(\{ \acct_{1i} \}_{i=1}^{\numaccs_j}, \{ \acct_{2i} \}_{i=1}^{\numaccs_j}, \comm{\varout^*}, \comm{\varin^{*}}, \aux), w=(\varout^*, \varin^*)$
+            and $R(x,w) = 1$ if:
+            {\begin{align*}
+                & f(\inpk, (\snap_1, \snap_2), \aux) =1 
+            \end{align*} }
+        \end{enumerate}
+    }
+        
+    \item[] 
+    {
+        If $f \in \{f_{\txnlimit}, f_{\open}\}$ then:
+        \begin{enumerate}
+            \item[4.] For each snapshot calculate $\comm{\varbl^{*}_{j}} = \prod_{i=1}^{\numaccs_j} {\acct_{ji}.\comm{\varbl}}$. Then calculate $\comm{\varbl^*} = \comm{\varbl^*_2}\cdot \left(\comm{\varbl^*_1}\right)^{-1}$ and $\varbl^* = \opencom(\sk, \comm{\varbl^*})$.
+            \item[5.] Form a zero-knowledge proof $\pi_2$ of the relation $R(x,w)$ where $x=(\{ \acct_{1i} \}_{i=1}^{\numaccs_j}, \{ \acct_{2i} \}_{i=1}^{\numaccs_j}, \comm{\varbl^{*}}, \aux), w=(\varbl^*)$ and $R(x,w)=1$ if:
+            {\begin{align*}
+                & f(\inpk, (\snap_1, \snap_2), \aux) =1 
+            \end{align*} }
+        \end{enumerate}
+    }
+ 
+    % \begin{itemize}
+    %     \item For the limit policy $\aux$ variable contains $\srlimit$ which is an upper bound of user's transfer amounts depending on application and it is defined by the Authority a-priori1.
+    %      Then the user should also prove that:
+    %     {\begin{align*}
+    %         \varout^* \leq \srlimit \wedge \varin^* \leq \srlimit
+    %     \end{align*}}
+
+    %     \item For the tax policy $\aux$ variable contains $(\rho, \txn_{TO})$, where $\txn_{TO}$ is transaction which inputs contains two accounts that belongs to the owner of $\inpk$ as sender and the Tax Office as receiver. 
+    %     Let $\vtof$ be the amount of money transferred in $txn_{TO}$.
+    %     Then the user should also prove that:
+    %   {  \begin{align*}
+    %         \frac{\vtof}{\varin^*} = \rho
+    %     \end{align*}}
+    % \end{itemize}
+    
+\end{enumerate}
+
+The final output is $\auditinfo = (\pi = (\pi_1, \pi_2), {\numaccs}_1, \{ \acct_{1i} \}_{i=1}^\numaccs, {\numaccs}_2, \{ \acct_{2i} \}_{i=1}^\numaccs)$.
+\end{boxfig}

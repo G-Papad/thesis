@@ -1,0 +1,41 @@
+\subsection{Accounts}
+User accounts are of the form $\acct = (\pk,\comm{\varbl}, \comm{\varout}, \comm{\varin})$, where $\varbl$ is the account balance and $\varout, \varin$ is the total amount that the account has sent and received, respectively.
+Each user may own multiple accounts which are stored in the $\utxoset$. 
+The following functionalities create, verify and update accounts.
+
+\begin{itemize}
+    % //TODO: 0 here (in a box) or bl?
+    \item $\acct \gets \newacc(\inpk; r_1, r_2, r_3, r_4)$: takes as input a public key $\inpk$ and outputs a new account of the form $\acct = (\pk, \comm{\varbl}, \comm{\varout}, \comm{\varin})$, where $ \pk = \upd(\inpk; r_1), \comm{\varbl} = \commit(\pk, 0;r_2),  \comm{\varout} = \commit(\pk, 0;r_3)$ and $\comm{\varin} = \commit(\pk, 0;r_4)$.
+    % \item $\acct \gets \newacc(\inpk, \varbl; r_1, r_2, r_3, r_4)$: takes as input a public key $\inpk$ and outputs a new account of the form $\acct = (\pk, \comm{\varbl}, \comm{\varin}, \comm{\varout})$, where $ \pk = \upd(\inpk; r_1), \comm{\varbl} = \commit(\pk, \varbl;r_2),  \comm{\varout} = \commit(\pk, 0;r_3)$ and  \\
+    % $\comm{\varin} = \commit(\pk, 0;r_4)$
+
+    % //TODO: do we need to verify upk?
+    \item $0/1 \gets \veract(\acct,\sk,\varbl,\varout,\varin)$: Parses $\acct$  as $(\pk, \com_1, \com_2, \com_3)$ and outputs 1 if
+    \begin{align*}
+        & \vercom(\sk, \pk, \com_1, \varbl) \land \vercom(\sk, \pk, \com_2, \varout) \land \\
+        & \vercom(\sk, \pk, \com_3, \varin) \land (\varbl, \varout, \varin \in \vset)
+    \end{align*}
+
+    \item $\{\acct'_i\}_{i=1}^n \gets \updacc(\{ \acct_i, {\vbl}_i, {\vin}_i, {\vout}_i \}_{i=1}^n; r_1,r_2,r_3,r_4)$ takes as input a set of accounts $\acct_i = (\pk_i, {\com_{\varbl}}_i, {\com_{\varout}}_i, {\com_{\varin}}_i)$ and values
+    ${\vbl}_i, {\vout}_i, {\vin}_i \in \vset$ and outputs a new set of accounts  $\{\acct'_i\}_{i=1}^n$,
+    where 
+    \begin{align*}
+        \acct'_i \gets  &(\upd (\pk;r_1), {\com_{\varbl}}_i \ \odot \commit(\pk, {\vbl}_i;r_2), \\
+                        & {\com_{\varout}}_i \ \odot  \commit(\pk,{\vout}_i;r_3 ), {\com_{\varin}}_i \ \odot  \commit(\pk, {\vin}_i;r_4)).
+    \end{align*}
+
+    % \item $\{\acct'_i\}_{i=1}^n \gets \updacc(\{ \acct_i, {\vbl}_i, {\vin}_i, {\vout}_i \}_{i=1}^n; r_1,r_2,r_3,r_4)$ takes as input a set of accounts $\acct_i = (\pk_i, \comm{\varbl_i}, \comm{\varout_i}, \comm{\varin_i})$ and values \\
+    % ${\vbl}_i, {\vout}_i, {\vin}_i \in \vset$ and outputs a new set of accounts  $\{\acct'_i\}_{i=1}^n$,
+    % where 
+    % \begin{align*}
+    %     \acct'_i \gets  &(\upd (\pk;r_1), \comm{\varbl_i} \ \odot \commit_\pk({\vbl}_i;r_2), \\
+    %                     & \comm{\varout_i} \ \odot  \commit_\pk({\vout}_i;r_3 ), \comm{\varin_i} \ \odot  \commit_\pk({\vin}_i;r_4)).
+    % \end{align*}
+
+    \item $0/1 \gets \verupdacc(\{\acct_i^\prime, \acct_i, {\vbl}_i, {\vout}_i, {\vin}_i\}_{i=1}^n; r_1,r_2,r_3,r_4)$: outputs 1 if
+    \begin{align*}
+        \{\acct_i^\prime\}_{i=1}^n =  \updacc(\{\acct_i, {\vbl}_i, {\vout}_i, {\vin}_i\}_{i=1}^n; r_1,r_2,r_3,r_4)  \land 
+                                      (|\vbl|,\vout, \vin  \in \vset).
+    \end{align*}
+
+\end{itemize}

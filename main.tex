@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper]{book}
+\documentclass[a4paper, thm-restate]{book}
 \input{src/preamble}
 % \pagestyle{myheadings}
 
@@ -6,17 +6,31 @@
 
 \title{Privacy and Auditability in Decentralized Payment Systems}
 \author{Γεώργιος Παπαδούλης }
-\date{October 2023}
+% \date{October 2023}
+
+% \newtheorem{theorem}{Theorem}
+\newtheorem{theorem}{Theorem} %[section]
+\newtheorem{corollary}{Corollary} %[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}{Definition}
 
 \begin{document}
     
+    \sle
+    \input{src/title_page.tex}
+    \newpage
+
     \tableofcontents
     
     \chapter{Introduction}
+        \input{src/intro.tex}
 
     \chapter{Background}
         \input{src/background/blockchain.tex}
         \input{src/background/bitcoin.tex}
+        % \input{src/background/preliminaries.tex}
+    
+    \chapter{Privacy in Payment Systems}
         \input{src/background/privacy.tex}
         \input{src/background/privateSchemes.tex}
 
@@ -24,13 +38,49 @@
     \input{src/audit_schemes/auditability.tex}
     \input{src/audit_schemes/auditSchemes.tex}
 
-    \chapter{Proposed Scheme}
+    \chapter{AQQUA: Augmenting Quisquis with Auditability}
+        \input{src/AQQUA/overview.tex}
+        \section{Definition of an Auditable Private Decentralized Payment System}
+        We now describe the components of an auditable and private DPS like AQQUA:
 
-    \chapter{Implementation}
+        \input{src/AQQUA/APDPS/entities.tex}
+        \input{src/AQQUA/APDPS/state.tex}
+        \input{src/AQQUA/APDPS/accounts.tex}
+        \input{src/AQQUA/APDPS/userinfo.tex}
+        \input{src/AQQUA/APDPS/policies.tex}
+        \input{src/AQQUA/APDPS/functionalities.tex}
 
-    \chapter{Evaluation}
+        \section{Security Model}\label{sec:model}
+        \input{src/AQQUA/security-model/security-properties.tex}
+        \input{src/AQQUA/security-model/anonymity-theft-prevention.tex}
+        \input{src/AQQUA/security-model/audit-soundness.tex}
+
+        \section{Our construction}\label{sec:scheme}
+        We now define AQQUA by realising the functionalities of an auditable payment scheme.
+
+        \input{src/AQQUA/construction/setup.tex}
+        \subsection{Registration}
+            \input{src/AQQUA/construction/register.tex}
+            \input{src/AQQUA/construction/verifyRegister.tex}
+            \input{src/AQQUA/construction/applyRegister.tex}
+        \subsection{Transactions}  
+            \input{src/AQQUA/construction/transaction.tex}
+            \input{src/AQQUA/construction/createAccount.tex}
+            \input{src/AQQUA/construction/deleteAcct.tex}
+            \input{src/AQQUA/construction/verifyTrans.tex}
+            \input{src/AQQUA/construction/applyTrans.tex}
+        \subsection{Audit}
+            \input{src/AQQUA/construction/audit.tex}
+            \input{src/AQQUA/construction/verifyAudit.tex}
+        
+        \section{Instantiating the Zero-knowledge Proof}
+        \input{src/AQQUA/appendix/proofSystem.tex}
+        \section{Analysis}
+            \input{src/AQQUA/security-model/proofsketch.tex}
+
 
     \chapter{Conclusion}
+    \input{src/conclusion.tex}
 
     \printbibliography
 

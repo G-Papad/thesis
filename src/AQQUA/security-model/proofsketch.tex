@@ -1,0 +1,34 @@
+% \subsection{Proofs of security}
+
+\subsubsection{Proof of anonymity}
+%The complete proof of anonymity is provided in the Appendix; however, we'll outline the main intuition here.
+Intuitively, we argue that any PPT adversary $\adv$ capable of distinguishing between $\txn_0, \txn_1$ in the anonymity game (find if $b'=b$) can be used to break either the indistinguishability of UPK scheme, the hiding property of commitment scheme, or the zero-knowledge property of the NIZK proofs. 
+
+Transactions consist of $\inputs, \outputs$, and a zk-proof $\pi$ (and if it is $\createAcct$ or $\deleteAcct$ a newly created account $\acct$). One way $\adv$ could determine $b$ is based  on $\pi$, but that violates the zero-knowledge property of the NIZK proofs. 
+Another way that $\adv$ could determine $b$ is to distinguish between $\txn_0, \txn_1$ through the $\outputs$ sets of each $\txn$. The only differences in the two  $\outputs$ sets $\txn_0.{\outputs}, \txn_1.{\outputs}$ are the accounts which are used in $\pset$ and in $\anset$ as well as the amount $v$ used to increase/decrease the variables in the accounts of $\pset$.
+However, since both the accounts' amounts and transferred value $v$ are presented in a committed form, if $\adv$ can determine $b$ based on the different values $v_0, v_1$ then the hiding property of the commitment scheme is violated.
+In addition, since all the accounts participating in the transaction are updated and randomly permuted, 
+% both those in $\pset$ and in $\anset$ (and the newly created account is an update of a former public key), 
+ $\adv$ cannot use $\pset_0, \anset_0,\pset_1, \anset_1$ to distinguish the two transactions without violating the indistinguishability property of UPK scheme.
+
+ \input{src/AQQUA/appendix/anonymity-proof.tex}
+
+\subsubsection{Proof of theft prevention}
+%The complete proof of theft prevention is provided in the Appendix; however, we'll outline the main intuition here. 
+Intuitively, we argue that any PPT adversary $\adv$ capable of winning the theft-prevention game can be used to break either the unforgeability property of UPK scheme, the binding property of commitment scheme, or the soundness property of the NIZK proofs.
+
+In order to win the theft-prevention game, $\adv$ should submit a transaction $\txn$ that either increases the total balance of the corrupted users, decreases the balance of honest users, or does not maintain preservation of value.
+This can happen in the following ways:
+The first way is if the adversary is able to transfer some amount from a honest user's account. However, this means that $\adv$ can compute the $\sk$ of the honest account, thus the unforgeability property of the UPK scheme is violated. 
+Secondly,  if $\adv$ manages to transfer more coins than the corrupted account holds. But in order for such a transaction to be valid, the adversary should either be able to make a zk-proof that violates the soundness property, or to compute an opening to a commitment with balance different from the real one, hence breaking the binding property of the commitment scheme. 
+The third way is by creating a transaction that breaks preservation of value, but in order for such a transaction to be valid, $\adv$ should again be able to construct an unsound zk-proof or break the binding property of the commitment scheme.
+
+\input{src/AQQUA/appendix/theft-prevention-proof.tex}
+
+\subsubsection{Proof of audit soundness}
+% The audit correctness property follows directly from the soundness and zero-knowledge properties of NIZK proofs.
+Intuitively, we argue that any PPT adversary $\adv$ capable of winning the audit soundness game can be used to break either the binding property of commitment scheme or the soundness property of the NIZK proofs. 
+
+In order to win the the audit soundness game, $\adv$ should either create a valid zero-knowledge proof without knowing the corresponding witness, or hide some of their accounts from the $\AA$. However, the former attack violates the soundness property of the zero-knowledge proof. The latter requires the $\adv$ to be able to open their commitment $\comm{\numaccs}$ to a different value, but this breaks again the binding property of the commitment scheme.
+
+\input{src/AQQUA/appendix/audit-soundness-proof.tex}

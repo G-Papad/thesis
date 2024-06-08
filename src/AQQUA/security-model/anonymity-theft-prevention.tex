@@ -1,0 +1,37 @@
+\subsection{Anonymity}
+
+In the anonymity game, the challenger first picks a bit $b\sample \{0,1\}$. The adversary, after interacting with the oracles, has to output two sender accounts $\acct_0, \acct_1$, two receiver accounts $\acct_0^\prime, \acct_1^\prime$, two amounts $v_0, v_1$ and an anonymity set $\anset$. Then, the challenger creates a transaction in which $\acct_b$ sends amount $v_b$ to $\acct_b^\prime$ using $\anset \cup \{\acct_{1-b}\}$ as the anonymity set. Finally, the adversary has to guess $b$, and if they guess correctly, they win the game.
+
+In the anonymity game, the following rules must be enforced or else the adversary could trivially guess $b$.
+\begin{itemize}
+    \item Both senders must be honest.
+    If one of the senders were corrupted, the adversary would be able to see whose account's balance decreases.
+    \item Both receivers are honest.
+    If both were corrupted then $\acct_0^\prime = \acct_1^\prime$ and $v_0=v_1$.
+    If one is corrupted, the adversary would be able to see which account's balance increased or the amount by which it increased.
+\end{itemize}
+
+The anonymity game is presented in Game \ref{alg:anonymity-game}.
+\input{src/AQQUA/security-model/algorithms/anonymity-game.tex}
+
+\begin{definition}\label{def:anonymity} 
+    The \emph{advantage} of the adversary in winning the anonymity game is defined as:
+    $
+        \advantage{\anonymity}{\adv} = \mid \Pr[\exper^{\anonymity}_{\adv}(\secpar)=1] - \dfrac{1}{2} \mid
+    $
+
+    A DPS satisfies \emph{anonymity} if for every PPT adversary $\adv$, $\advantage{\anonymity}{\adv}$ is negligible in  $\secpar$.
+\end{definition}
+
+\subsection{Theft Prevention}
+In order for the adversary to win the theft prevention game, they have to output a valid transaction that, when applied, either increases the wealth of the users they control, decreases the wealth of the honest parties, or alters the total wealth of all the users (i.e. the adversary's transaction either created or destroyed wealth). The theft prevention game is presented in Game \ref{alg:theftprevention}.
+
+\input{src/AQQUA/security-model/algorithms/theft-prevention-game.tex}
+
+\begin{definition}\label{def:theft-prevention}
+    The \emph{advantage} of the adversary in winning the theft prevention game is defined as
+    $
+        \advantage{\theftprevention}{\adv} = \Pr[\exper^{\theftprevention}_{\adv}(\secpar)=1]
+    $
+    A DPS satisfies \emph{theft prevention} if for every PPT adversary $\adv$, $\advantage{\theftprevention}{\adv}$ is negligible in $\secpar$.
+\end{definition}

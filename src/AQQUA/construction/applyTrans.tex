@@ -1,0 +1,25 @@
+\subsubsection {Apply Transaction}
+%The $\state' \gets \applytxn (\txn)$ algorithm is executed after the 
+The $\applytxn (\txn, \state)$ algorithm is executed after the 
+verification of the transaction. It applies the transaction $\txn$ by updating the current state, adding $\txn.\outputs$ and removing $\txn.\inputs$.
+
+\begin{itemize}
+    \item If $\txn$ is the result of the $\trans$ algorithm, it updates only the $\state.\utxoset$ with the new accounts. 
+    
+    % Similarly to \cite{fauzi2019quisquis}, upon receiving the new state $\state'$ the rest of the users whose accounts were included into $\txn[\inputs]$ should identify which account of $\txn[\outputs]$ belongs to them. This is accomplished by iterating through all $\acct \in \txn[\outputs]$ and running $\verkp(\pk, \sk)$, where $\pk$ the public key of $\acct$ and $\sk$ the secret key of the user. 
+    
+    % Afterwards, the user should identify if their account was used as a recipient or part of the anonymity set in the transaction. This is achieved by running the $\veract(\acct, \sk, \varbl, \varout, \varin)$ algorithm. If its result is $1$ then the account was used as part of the anonymity set. Else, the user must find out the new values of their account's variables $(\varbl, \varout, \varin)$. %We assume that the values that these variables can have are small enough (32 bits), so the discrete logarithm problem is computationally easy (computing $v$ from $g^v$).
+    % These values are small enough so that the computation of their discrete logarithm takes places in a reasonable time. 
+
+    \item If $\txn$ is the result of the $\createAcct$ algorithm, it updates the $\state.\usersset$ and adds the newly created account in the $\state.\utxoset$. 
+    % \item If $\txn$ is the result of the $\deleteAcct$ algorithm, it removes $\txn.\inputs_\usersset$ from $\state.\usersset$ and adds $\outputs_\usersset$. It similarly updates $\state.\utxoset$ with $\txn.\inputs_\utxoset$ and $\txn.\outputs_\utxoset$.
+    \item If $\txn$ is the result of the $\deleteAcct$ algorithm, it updates both $\state.\usersset$ and $\state.\utxoset$.
+
+\end{itemize}
+
+    Similarly to~\cite{fauzi2019quisquis}, upon receiving a new state, users whose accounts are included in a tranction's $\inputs$ should identify their updated accounts in $\outputs$. This can be accomplished by iterating through every $\acct \in \outputs$ and using $\verkp(\sk, \acct.\pk)$. Once the user identifies an updated account, they can check whether their account was used as part of the anonymity set or as a recipient, by running $\vercom(\sk, \acct.\pk, \acct.\com_\varbl, \varbl)$, passing as input the account's previous balance $\varbl$. If the result is $1$, then the account was used as part of the anonymity set. Otherwise, the user must find out the new value for the balance. The value is small enough so that the computation of its discrete logarithm takes place in a reasonable time. 
+
+%  Similarly to \cite{fauzi2019quisquis}, upon receiving the new state $\state'$ the rest of the users whose accounts were included into $\txn[\inputs]$ should identify which account of $\txn[\outputs]$ belongs to them. This is accomplished by iterating through all $\acct \in \txn[\outputs]$ and running $\verkp(\pk, \sk)$, where $\pk$ the public key of $\acct$ and $\sk$ the secret key of the user. 
+    
+    % Afterwards, the user should identify if their account was used as a recipient or part of the anonymity set in the transaction. This is achieved by running the $\veract(\acct, \sk, \varbl, \varout, \varin)$ algorithm. If its result is $1$ then the account was used as part of the anonymity set. Else, the user must find out the new values of their account's variables $(\varbl, \varout, \varin)$. %We assume that the values that these variables can have are small enough (32 bits), so the discrete logarithm problem is computationally easy (computing $v$ from $g^v$).
+    % These values are small enough so that the computation of their discrete logarithm takes places in a reasonable time. 
