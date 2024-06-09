@@ -1,0 +1,27 @@
+\subsection{DLOG and DDH assumptions}
+In this section two important problem used extensively in cryptography, Discrete Logarithm Problem and Decisional Diffie-Hellman Problem are defined.
+
+\begin{definition}\label{def:dlog-prolem} 
+    Discrete Logarithm Problem (DLP)
+
+    Let $\group$ be a finite cyclic group and $g$ one of its generators.
+    Given $h \in \group$ find $x < |\group|$ such that $g^x = h$.
+\end{definition}
+
+\begin{definition}\label{def:ddh-problem} 
+    Decisional Diffie-Hellman Problem (DDHP)
+
+    Let $\group$ be a finite cyclic group and $g$ one of its generators.
+    Given $g^\alpha, g^\beta, g^\gamma \in \group$ find if $\gamma = \alpha \cdot \beta$.
+\end{definition}
+
+If it holds that $(G, \cdot) < (\ZZ_p^*, \cdot)$ and $|G| = q$ where $p,q$ large prime numbers (at least 1024 bits) then the problems DLP, DDHP are considered computational difficult.
+
+\begin{definition}\label{def:dlog-assumption}
+    Discrete Logarithm Assumption (DLOG)
+
+    The discrete logarithm assumption holds in a group $\group$ if for all PPT algorithms $\adv$ there exists a negligible function $negl_\adv$ such that:
+    \begin{equation*}
+        Pr[x \gets \adv(1^\lambda, \group, h,g)] \leq negl_{\adv}(\lambda)
+    \end{equation*}
+\end{definition}

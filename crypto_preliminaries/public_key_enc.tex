@@ -1,0 +1,54 @@
+\subsection{Public Key Encryption}
+
+The components of public key cryptography will be strictly defined in this section. 
+
+A cryptosystem is a tuple of the following three algorithms $(\kgen, \enc, \dec)$ such that if $m$ a message then:
+\begin{itemize}
+    \item $k \gets \kgen()$
+    \item $c \gets \enc(k,m)$
+    \item $m \gets \dec(k,c)$
+    \item Also it holds that $\dec(\enc(m)) = m$.
+\end{itemize}
+
+A public key encryption cryptosystem has the following properties:
+
+The $\kgen$ algorithm produces a pair of keys, denoted as $(\pk, \sk)$. $\sk$ is the private key and must remain hidden, while $\pk$ is the public key and is known to everyone using the system. 
+When someone wants to send a message $m$ to a particular recipient, the sender encrypts $m$ using the $\enc$ algorithm under the recipient's $\pk$. Only the owner of the corresponding $\sk$ can use the $\dec$ algorithm and decrypt the encrypted message to the original plaintext $m$.
+
+The positive aspect of public key cryptography is that it does not require an exchange of keys between each user of the system; as soon as a new person joins the network, he only needs to publish his public key and can receive messages from any other user.
+
+An example of public key encryption scheme is the ElGamal cryptosystem.
+
+% \input{crypto_preliminaries/elgamal/elgamal.tex}
+\subsubsection{ElGamal}
+ElGamal is based on DLOG assumptions. It consists of the following algorithms:
+\begin{itemize}
+    \item \textbf{Key-pair Generation} - $\kgen()$:
+    \begin{enumerate}
+        \item Choose $p,q$ large primes such that $q|(p-1)$ and a generator $g$ of subgroup $\group$ with order $q$ of group $\ZZ_p^*$.
+        \item Choose random $x \in \ZZ_q$
+        \item Calculate $y = g^x$ mod $p$
+        \item Return key-pair $(\sk, \pk) = (x,y)$ 
+    \end{enumerate}
+
+    \item \textbf{Encryption} - $\enc(\pk, m)$:
+    \begin{enumerate}
+        \item Sample $r \sample \ZZ_q$
+        \item Calculate $G = g^r$ mod $p$
+        \item Calculate $M = my^r$ mod $p$
+        \item Return ciphertext $c = (G,M)$
+    \end{enumerate}
+
+    \item \textbf{Decrypt} - $\dec(\sk, c)$:
+    \begin{enumerate}
+        \item Given ciphertext $c = (G,M)$ and the owner of $\sk = x$ can calculate $m = \frac{M}{G^x}$.
+    \end{enumerate}
+    It is obvious that $\dec(\sk, \enc(m)) = m$ since:
+    \begin{equation*}
+        \frac{M}{G^x} = \frac{my^r}{{(g^r)}^x} = \frac{{m(g^)}^r}{g^{xr}} = m
+    \end{equation*}
+\end{itemize}
+
+There is also a variation of ElGamal encryption that returns as message $g^m$ instead of $m$ that is called exponential ElGamal. This variation is offers also additive homomorphism.
+
+% \input{crypto_preliminaries/elgamal/twisted_elgamal.tex}

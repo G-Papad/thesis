@@ -1,0 +1,7 @@
+\subsection{Merkle Trees}
+
+The Merkle tree is a structure that can be represented graphically in the form of a regular binary tree. Its characteristic is that all information is stored in its leaves and each non-leaf node stores the hash of its children's values. Inductively, only one value is stored at the root of the tree, which is obtained in the way described above. It is obvious that the value of the root hash is influenced by all the data in the leaves and is somehow representative of all the information. 
+
+Because of the collision resistant property of hash function, if two merkle trees have the same root then with very high probability (approximately 1) they will contain the same data. If the hashes of the roots are not identical, then again there is a high probability that the information in the two trees is not the same, and a binary search (following the different hashes) can efficiently find - in logarithmic time to the size of the data - where the two data blocks differ.
+
+Merkle trees can be used in order nodes to maintain a concise representation of shared data.

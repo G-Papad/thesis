@@ -1,0 +1,14 @@
+\subsection{Commitments}
+
+A commitment scheme is a tool that allows an entity to select a value without revealing it and without having the ability to change it.
+More specifically, a commitment scheme consists of the following algorithms:
+\begin{itemize}
+    \item $ck \gets \kgen(1^\lambda)$: Creates the public commitment key $ck$.
+    \item $(c,o) \gets \commit_{ck}(m)$: Binds message $m$ to $c$ and produces an oppening $o$. 
+    \item $0/1 \gets \opencom_{ck}(c,o,m)$: Checks if the commitment $c$ corresponds to the message $m$.
+\end{itemize}
+A commitment scheme should have the following properties:
+\begin{itemize}
+    \item \textbf{Hiding}: This property ensures that the commitment hides the value from the receiver until the committer chooses to reveal it. The receiver cannot derive any information about the committed value from the commitment alone.
+    \item \textbf{Binding}: This property ensures that the committer cannot change the value after the commit. This property protects the receiver.
+\end{itemize}

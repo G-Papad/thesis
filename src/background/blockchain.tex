@@ -1,1 +1,40 @@
 \section{Blockchain}
+
+The introduction of blockchain technology with the launch of Bitcoin \cite{nakamoto2009bitcoin} in 2008 has revolutionized the way digital transactions are conducted and is the backbone of cryptocurrencies. Basically, blockchain is a distributed, immutable, append-only ledger that contains transactions across a peer-to-peer network.
+
+Before blockchain, traditional payment systems relied on a centralized authority, such as banks, to ensure the validation of transactions. 
+Blockchain technology allows two willing parties to transact directly with each other without the need for a trusted third party. 
+This is achieved by using cryptographic techniques and a consensus mechanism to ensure that once a transaction is added to the Blockchain, it cannot be altered or deleted. 
+All transaction are publicly available, as well as publicly verifiable, and each participant, or node, maintains a copy of the entire blockchain. This eliminates the need for a central authority and reduces the risk of single points of failure \autoref{fig:pwc-blockchain}. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/blockcahin_how.png}
+    \caption{How blockchain works \cite{pwcBlockchain}}
+    \label{fig:pwc-blockchain}
+\end{figure}
+
+In payment systems, blockchain data contains the transactions of users. Transactions are stored in blocks, and each block is linked to the previous block by hashing its contents. In that way, a chain of blocks is created \autoref{fig:blockchain-blocks}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/chain_of_blocks.png}
+    \caption{Blocks in Blockchain \cite{nakamoto2009bitcoin}}
+    \label{fig:blockchain-blocks}
+\end{figure}
+
+\subsubsection{Permissioned vs Permissionless}
+The consensus mechanism ensures that all participants agree on the same ledger. There are two categories of Blockchain, depending on whether those involved are known or not known to the system. 
+\begin{itemize}
+    \item \textbf{Permissioned}: Permissioned blockchains are private networks where access to the blockchain is restricted. In this type only authorized participants can join the network. This ensures that all participants are known and trusted.
+    \item \textbf{Permissionless}: In a permissionless setting, anyone can join the network, participate in the consensus process, and view all transactions on the blockchain. However, in a permissionless blockchain, a mechanism to prevent sybil identities is required to ensure the validity of the consensus algorithm, such us Proof of Work (PoW) or Proof of Stake (PoS).
+\end{itemize}
+
+\subsubsection{How to track ownership in Blockchain}
+In blockchains, there are basically two ways to do ownership tracking:
+\begin{itemize}
+    \item \textbf{UTXO model}: In UTXO (Unspent Transaction Output) model transactions contains inputs and outputs. Transaction inputs are references to previous unspent transaction outputs, meaning that they are constructed from a transaction but have not been used as inputs in any previous transaction. Each transaction consumes its transaction inputs and generates new UTXOs, specifying the amount of the cryptocurrency and the recipient address. participants need to maintain all unspent transactions and balance  is the sum of UTXOs destined to specific address.
+    
+    \item \textbf{Account-based model}: In the account-based model, each address has an account on the blockchain associated with a balance that is updated based on the currency transfer transactions that account issues or receives.
+
+\end{itemize}

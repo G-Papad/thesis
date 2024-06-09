@@ -1,0 +1,16 @@
+\subsection{Hash Functions}
+
+Hash Functions play fundamental role in modern cryptography. They map elements of a set with a large number of elements to another set with a smaller number of elements. Therefore, these functions are of the form of $H: \ X \rightarrow Y, |X| > |Y|$, where it is possible that $|X| = \infty$, while $|Y|$ can be a finite set. It is obvious, that exists some elements pf $X$ that will be mapped tp the same elements of $Y$.
+
+More specifically, a hash function is a function that has the following properties:
+\begin{itemize}
+    \item \textbf{Compression}. The value $H(x)$ has a specific length for any input $x$.
+    \item \textbf{Computationally efficient}. There is a deterministic polynomial-time algorithm $A$ such that $H(x) = A(H,x) \ \forall x$. 
+\end{itemize}
+
+A Hash Function need to several additional properties in order to be useful:
+\begin{itemize}
+    \item \textbf{Pre-image Resistance}: Given a hash value $y$, it is computational hard to find $x$ such that $H(x) = y$.
+    \item \textbf{Second Pre-image Resistance}: Given an element $x_1$ and its hash value $H(x_1)$ it is computational difficult to find an element $x_2 \neq x_1$ such that $H(x_2) = H(x_1)$.
+    \item \textbf{Collision Resistance}: It is computationally infeasible to find any two different inputs $x_1, x_2$ such that $H(x_1) = H(x_2)$.
+\end{itemize}
