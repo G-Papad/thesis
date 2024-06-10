@@ -2,7 +2,7 @@
 
 A common way to implement auditability in private systems is to introduce a centralized authority or group of authorities (multi-party computation). Such authority can either be an external designated auditor or can enforce the internal policy rules in each transaction (accountability). 
 
-According to this approach users embed auxiliary information to the transactions that are encrypted under the public key of a designated trusted auditor (\autoref{fig:cent-aud}). Therefore, the users data are remain private for the rest of the system's participants except the centralized authority, which can decrypt the auxiliary information at any point without the consent of the users. 
+According to this approach, users embed auxiliary information in the transactions, which is encrypted under the public key of a designated trusted auditor (\autoref{fig:cent-aud}). Thus, the users' data remains private to the rest of the system's participants, except for the central authority, which can decrypt the auxiliary information at any time without the users' consent. 
 
 \begin{figure}
     \centering
@@ -12,9 +12,9 @@ According to this approach users embed auxiliary information to the transactions
 \end{figure}
 
 
-This method can be a trivial solution for adding auditability to privacy-preserving systems. However, all the data is collected by a single centralized authority, which accumulates excessive power. This fact can negatively impact the user privacy.
+This method can be a trivial solution for adding auditability to privacy-preserving systems. However, all data is collected by a single centralized authority, which accumulates excessive power. This fact can have a negative impact on user privacy.
 
-One example that implement this approach is presented below:
+An example that implements this approach is presented below:
 
 \input{src/audit_schemes/zcashext.tex}
 % \input{src/audit_schemes/prcash.tex}
@@ -23,9 +23,9 @@ One example that implement this approach is presented below:
 
 \section{General Auditor}
 
-In order to avoid gathering all the information to one (or a group) centralized authority a second approach were proposed. That is an interactive protocol between the user being audited and the auditor. In this case, the auditor, who can be \textit{any} auditing authority, can ask specified questions which derives from system's policies. Users answer to this questions with zero-knowledge proofs based on data that are stored on chain (\autoref{fig:gen-aud}).
+To avoid collecting all information at a centralized authority (or group of authorities), a second approach has been proposed. This is an interactive protocol between the user being audited and the auditor. In this case, the auditor, which can be \textit{any} auditing authority, can ask specified questions derived from the system's policies. Users answer these questions with zero-knowledge proofs based on data stored on chain (\autoref{fig:gen-aud}).
 
-This protocol implies the concent and the cooperation from the audited user. However, this requirement cannot be exploited by non-compliant users due to the fact that refusal to cooperate with authorities can be considered equivalent to a failed audit.
+This protocol implies the consent and cooperation of the audited user. However, this requirement cannot be exploited by non-compliant users, since refusal to cooperate with authorities can be considered equivalent to a failed audit.
 
 \begin{figure}
     \centering
@@ -34,8 +34,7 @@ This protocol implies the concent and the cooperation from the audited user. How
     \label{fig:gen-aud}
 \end{figure}
 
-Some typical examples of auditable private decentralized systems who implement a general auditor are presented below:
-
+Below are some typical examples of auditable private decentralized systems that implement a general auditor:
 \input{src/audit_schemes/zkledger.tex}
 % \input{src/audit_schemes/miniledger.tex}
 \input{src/audit_schemes/pgc.tex}
