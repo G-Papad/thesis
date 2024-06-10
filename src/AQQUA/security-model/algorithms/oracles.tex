@@ -21,7 +21,7 @@
     \oracle{\disclose{$\pk, \state$}}{
         \tcp*{$\pk$ should be a key of an account or user information in $\state$, aborts otherwise}
         $\sk \gets \findsecretkey(\pk, \state)$ \;
-        $\honest \gets \honest \setminus \{\sk\}$ \;
+        $\honest \gets \honest \setminus \{\sk\}$ ;
         $\corrupt \gets \corrupt \cup \{\sk\}$ \;
         \Return{$\sk$}
     } 
@@ -32,7 +32,7 @@
         \If{$\verreg(\userinfo, \acct, \pi, \state) = 0$}{
             \Return{$\bot$} \tcp*{cannot be registered given current state}
         }
-        $\entries \gets \entries \cup \{\sk\}$ \;
+        $\entries \gets \entries \cup \{\sk\}$ ;
         $\honest \gets \honest \cup \{\sk\}$ \;
         $\state^\prime \gets \applyreg(\userinfo, \acct, \state)$;
         $\stateslist \gets \stateslist \cup [\state^\prime]$ \;
