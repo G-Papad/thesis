@@ -53,16 +53,6 @@ They can be captured as predicates over an initial public key $\inpk$, a time pe
         % \end{multline*}
 
         \item Open policy $f_{\open}$: The value of the amount sent or received by a user in a transaction.
-        % \begin{align*}
-        %     f_{\open}(\sk, \txn, v_{\open}) = 1 \iff 
-        %     \left\{ \begin{aligned}   
-        %     & \text{ if } S=\{ \acct \in \txn.\inputs \mid \verkp(\sk, \acct.\pk)=1 \} \\ 
-        %     & \text{ and } S^\prime =\{ \acct^\prime \in \txn.\outputs \mid \verkp(\sk, \acct^\prime.\pk)=1 \} \\
-        %     & \text{ we have that } \\
-        %     & v = \left(\sum_{\acct \in S^\prime}\varbl - \sum_{\acct \in S}\varbl \right)\in \vset \lor v = \left(\sum_{\acct \in S}\varbl - \sum_{\acct \in S^\prime}\varbl \right)\in \vset \\
-        %     & \land v = v_{\open} 
-        % \end{aligned} \right\}
-        % \end{align*}
         \begin{align*}
             f_{\open}(\inpk, (\snap_1, \snap_2), v_{\open}) = 1 \iff 
             \left\{ \begin{aligned}   
@@ -79,9 +69,6 @@ They can be captured as predicates over an initial public key $\inpk$, a time pe
         \begin{align*}
             f_{\txnlimit}(\inpk, (\snap_1, \snap_2), v_{\max}) = 1 \iff  
             \left\{ \begin{aligned} 
-            % & \text{ if } S=\{ \acct \in \txn.\inputs \mid \verkp(\sk, \acct.\pk)=1 \} \\ 
-            % & \text{ and } S^\prime =\{ \acct^\prime \in \txn.\outputs \mid \verkp(\sk, \acct^\prime.\pk)=1 \} \\
-            % & \text{ we have that } \\
             & v = \left(\sum_{\acct \in A_1}\varbl - \sum_{\acct \in A_2}\varbl \right) \leq v_{\max} 
             \end{aligned} \right\}
         \end{align*}

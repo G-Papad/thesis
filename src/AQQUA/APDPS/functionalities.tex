@@ -2,68 +2,39 @@
 An auditable private decentralized payment system is a tuple of polynomial-time algorithms defined as below:
 
 \begin{itemize}
-    % \item $(\state) \gets \setup(\secpar, \vec{\varbl})$: 
     \item $(\instate, \params) \gets \setup(\secpar)$: 
     Generates the initial state of the system $\instate$ and the public parameters $\params$, which are implicitly given as input to all other algorithms.
-    % It runs the $\genuser, \newacc$ algorithms and initializes the User and UTXO sets (to potentially empty sets). 
 
     \item $(\sk, \userinfo, \acct, \pi) \gets \reg()$: 
     Used by a user to create the registration information $\userinfo$ and their first account $\acct$.
-    % \item $(\sk, \userinfo, \acct, \pi_m, \pi_a) \gets \reg(\varbl)$: 
-    % Used by a user to create the registration information $\userinfo$ and an initial account $\acct$ with specified balance $\varbl$.
-    % Used by a user to create the registration information, $(\inpk, \comm{\numaccs})$ a pseudonym within the system and a commitment to the number of accounts this pseudonym is associated with, as well as an initial account $\acct$ with specified balance $\varbl$.
-    
-    % Used by a user to create an initial public key $\inpk$ in order to use the system. Internally runs $(\sk, \userinfo = (\inpk, \comm{\numaccs})) \gets \genuser(\secpar)$ and creates a zk-proof $\pi$ that the number of the existing accounts in the UTXO set $\comm{\numaccs}$ is equal to 0. 
 
     \item $0/1 \gets \verreg(\userinfo, \acct, \pi, \state)$: 
         Used by the Registration Authority to verify the registration information and the account of a user.
-    % \item $0/1 \gets \verreg(\userinfo, \acct, \pi_m, \pi_a, \state)$: 
-    %     Used by the Registration Authority to verify the registration information and the created account of a user.
-        % //TODO: do we want seperate verify register algorithms for the RA and the miners?
 
     \item $\state' \gets \applyreg(\userinfo, \acct, \state)$:
         Used by the Registration Authority to add a user to the system after their successful registration.
     
     \item $\txn = (\{\acct\}_{i=1}^n, \{{\acct}'\}_{i=1}^n, \pi) \gets \trans(\sk,\sset, \rset, \vv{\v_\sset}, \vv{\v_\rset}, \anset)$:
     Used by the sender with secret key $\sk$ to create a transaction that redistributes their coins from their accounts in $\sset$ among the recipients accounts in $\rset$. The vectors $\vv{\v_\sset},\vv{\v_\rset}$ describe the changes in the values in $\sset, \rset$ respectively. To hide the participating accounts, an anonymity set $\anset$ is passed as input.
-   %  The vectors $\vec{\vbl}$ represent the desired changes in the balance for each participant. 
-   %  As in $\createAcct$ algorithm, the sender uses an anonymity set $\anset$ in order to hide the link between their accounts and those of the recipient.
-   %  The output $\txn$ includes a set of current accounts $\{\acct\}_{i=1}^n$, a set of updated accounts $\{{\acct}'\}_{i=1}^n$ and a zero-knowledge proof $\pi$ that the transaction is valid.
-
-
 
     \item $\txnca = (\acct, \{\userinfo_i\}_{i=1}^n, \{\userinfo_i^\prime\}_{i=1}^n, \pi)\gets \createAcct(\userinfo, \anset)$: 
         Creates a transaction to create a new account for the owner of $\userinfo.\inpk$ and appropriately updates the value of the commitment to the number of accounts they own, $\userinfo.\com_{\numaccs}$.
         To hide the link between the newly created account $\acct$ and the corresponding $\inpk$, an anonymity set $\anset$ is given.
-        % In order to hide the link between the newly created account $\acct$ and the corresponding $\inpk$, the algorithm also takes as input an anonymity set $\anset$ consisting of entries $\userinfo \in \usersset$.
-        % The output $\txnca$  includes the newly created account ${\acct}$, the set $\{\userinfo\}_{i=1}^n=\anset \cup \{\userinfo\}$, a set of updated user info $\{{\userinfo}'\}_{i=1}^n$ and a zero-knowledge proof $\pi$ that the new account and the updated user info set are valid.
-    
-    % \item $0/1 \gets \vercreateAcct(\txnca, \state)$:
-    %     It is a public verification algorithm that checks the validity of the creation of a new account given the current state and outputs $1$ if and only if it is valid.
-    %     % If it is valid outputs an updated state else 0.
 
-    \item $\txnda = (\{\acct\}_{i=1}^n, \{{\acct}'\}_{i=1}^n, \{\userinfo\}_{i=1}^n, \{{\userinfo}'\}_{i=1}^n  \pi) \gets \deleteAcct(\sk, \userinfo, \accttodelete, \accttotransfer, \anset_1, \anset_2)$: 
+    \item $\txnda = (\{\acct\}_{i=1}^n, \{{\acct}'\}_{i=1}^n, \{\userinfo\}_{i=1}^n, \{{\userinfo}'\}_{i=1}^n  \pi)$\\ $\gets \deleteAcct(\sk, \userinfo, \accttodelete, \accttotransfer, \anset_1, \anset_2)$: 
         Delete a zero-balance account $\accttodelete$ from the UTXO set from owner of $\sk$, and adding its auditing info $(\varout, \varin)$ to another account $\accttotransfer$ that shares the same $\sk$. Anonymity sets $\anset_1, \anset_2$ are included to hide $\accttotransfer$ and $\userinfo$, respectively.
-
-    % \item $0/1 \gets \verdeleteAcct (\txnda, \state)$:
-    %     It is a public verification algorithm that checks the validity of the deletion of an account given the current state and outputs $1$ if and only if it is valid.
 
     \item $0/1 \gets \vertxn(\txn, \state)$: 
     It is a public verification algorithm that checks the validity of a transaction $\txn$ given the current $\state$ and outputs $1$ if and only if it is valid. 
-    % The input accounts of the transaction should be considered unspent (should appear in the UTXO set of the current $\state$) 
-    % If the transaction is valid outputs an updated $\state$ else 0.
     
     \item $\state' \gets \applytxn (\txn, \state)$:
         Used to apply to the current state a transaction $\txn$, after its verification.
     
-    \item $\auditinfo = (\pi, {\numaccs}_1, \{ \acct_{1i} \}_{i=1}^{\numaccs_1}, {\numaccs}_2, \{ \acct_{2i} \}_{i=1}^{\numaccs_2}) \gets \audit(\sk,\inpk \snap_{1}, \snap_{2}, (f, \aux))$: 
+    \item $\auditinfo = (\pi, {\numaccs}_1, \{ \acct_{1i} \}_{i=1}^{\numaccs_1}, {\numaccs}_2, \{ \acct_{2i} \}_{i=1}^{\numaccs_2})$ \\ $\gets \audit(\sk,\inpk \snap_{1}, \snap_{2}, (f, \aux))$: 
         Used by a user with secret key $\sk$ and initial public key $\inpk$ to generate a proof $\pi$ for being compliant with policy $f$, concerning a specific period of time defined by two blockchain snapshots $\snap_1, \snap_2$. 
         The $\aux$ variable contains the auxiliary information needed for the policy. 
     
-    % \item $0/1 \gets \vera(\inpk, \snap_1, \snap_2, ({\numaccs}_1, \{ {\acct_1}_{i} \}_{i=1}^\numaccs, {\numaccs}_2, \{ {\acct_2}_{i} \}_{i=1}^\numaccs), (f,\aux), \pi)$. 
     \item $0/1 \gets \vera(\inpk, \snap_1, \snap_2, (f,\aux), \auditinfo)$. 
         Used by the Audit Authority to check if the user with initial public key $\inpk$ is compliant with policy $f$.
-
-    
 
 \end{itemize}
