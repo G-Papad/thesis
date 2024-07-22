@@ -13,7 +13,7 @@ In order to create such a signature the signer executes the following steps. Fir
 
 Anyone can publicly verify that the signer is a member of the ring by using the public keys of the ring. However they cannot distinguish which corresponding secret key was used to produce the signature.
 
-So in Monero, when a user wants to create a transaction, he chooses an anonymity set that includes the public keys of other users' utxo inputs, and creates a ring signature with their own utxo input (corresponding to their public address) and those in the anonymity set.
+So in Monero, when a user wants to create a transaction, they choose an anonymity set that includes the public keys of other users' utxo inputs, and creates a ring signature with their own utxo input (corresponding to their public address) and those in the anonymity set.
 Since no one can distinguish the utxo input that was spent in the transaction, it cannot be removed from the utxo set either.
 
 \begin{figure}[!tbp]
@@ -37,7 +37,7 @@ In order to improve its anonymity, each Monero transaction generates a one-time 
 
 An example of such addresses is presented bellow implemented using elliptic curves:
 
-Let Alice be the sender and Bob the receiver. Bob owns a key-pair of the form $\pk = (A,B), \sk = (a,b)$ such that $A = aG, B= bG$ where $G$ is the base of the used elliptic curve. Then Alice generates a random $r$ and calculates $P = H{rA}G + B$, where $H$ is a collision-resistant hash function. Alice publish $P, R = rG$ together with the transaction. Afterwards, Bob can check if $P^\prime = H{aR}G + B$. If the transaction is destined for Bob then it holds that $P^\prime = P$.
+Let Alice be the sender and Bob the receiver. Bob owns a key-pair of the form $\pk = (A,B), \sk = (a,b)$ such that $A = aG, B= bG$ where $G$ is the base of the used elliptic curve. Then Alice generates a random $r$ and calculates $P = H{rA}G + B$, where $H$ is a collision-resistant hash function. Alice publishes $P, R = rG$ together with the transaction. Afterwards, Bob can check if $P^\prime = H{aR}G + B$. If the transaction is destined for Bob then it holds that $P^\prime = P$.
 
 Obviously, no one will know that this address is intended for Bob, but only Bob can prove that this address is associated with him. In this way, Monero hides the recipient address of the transaction.
 

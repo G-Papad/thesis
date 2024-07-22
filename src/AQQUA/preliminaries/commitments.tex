@@ -8,7 +8,7 @@ Our commitments must satisfy the following properties:
     \item \textbf{Unconditional binding}: A commitment cannot be opened to two different messages, even with the knowledge of the secret key $\sk$.
     \item \textbf{Additively homomorphic}: For given operation $\odot$ it holds that \\
      $\commit(\pk, m;r) \odot \commit(\pk, m';r') = \commit(\pk, m+m';r+r')$.
-    \item \textbf{Key-anonymous}: An adversary cannot distinguish between \\
+    \item \textbf{Key-anonymity}: An adversary cannot distinguish between \\
      $(m, \pk_0, \pk_1, \commit(\pk_0, m))$ and $(m, \pk_0, \pk_1, \commit(\pk_1, m))$ for any honestly generated public keys $\pk_0, \pk_1$ and adversarially chosen message $m$.
 \end{itemize}
 

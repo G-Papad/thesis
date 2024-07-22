@@ -25,9 +25,9 @@ Therefore, we need some auxiliary functions for the proof that are defined as fo
 \begin{itemize}
     \item $\createdelta(\{\acct_i\}_{i=1}^{n}, \{{\vbl}_i\}_{i=1}^{n}, \{{\vout}_i\}_{i=1}^{n}, \{{\vin}_i\}_{i=1}^{n})$: Creates a set of accounts that contains the differences between accounts' variables $\varbl, \varout, \varin$ in the input and output accounts, and another set of accounts that also contains these differences but all with the global public key $(g,h)$:
     \begin{enumerate}
-        \item Parse $\acct_i = (\pk_i, \com_{\varbl,i}, \com_{\varout,i}, \com_{\varin,i})$. Sample $r_{(\varbl|\varout|\varin),1}, \dots, r_{ (\varbl|\varout|\varin),n-1} \sample \mathbb{F}_p$ and set $r_{(\varbl|\varout|\varin),n} = -\sum_{i=1}^{n-1} r_{(\varbl|\varout|\varin),i}$. 
-        \item Set $\acct_{\delta,i} = (\pk_i, \commit(\pk_i,{\vbl}_i; r_{\varbl,i}), \commit(\pk_i,{\vout}_i; r_{\varout,i}), \commit(\pk_i,{\vin}_i; r_{\varin,i}))$
-        \item Set $\acct_{\epsilon,i} = ((g,h), \commit((g,h),{\vbl}_i; r_{\varbl,i}), \commit((g,h),{\vout}_i; r_{\varout,i}), \commit((g,h),{\vin}_i; r_{\varin,i}))$
+        \item Parse $\acct_i = (\pk_i, \com_{\varbl,i}, \com_{\varout,i}, \com_{\varin,i})$. \\ Sample $r_{(\varbl|\varout|\varin),1}, \dots, r_{ (\varbl|\varout|\varin),n-1} \sample \mathbb{F}_p$ and set $r_{(\varbl|\varout|\varin),n} = -\sum_{i=1}^{n-1} r_{(\varbl|\varout|\varin),i}$. 
+        \item Set $\acct_{\delta,i} = (\pk_i, \commit(\pk_i,{\vbl}_i; r_{\varbl,i}), \commit(\pk_i,{\vout}_i; r_{\varout,i}),$ \\ $ \commit(\pk_i,{\vin}_i; r_{\varin,i}))$
+        \item Set $\acct_{\epsilon,i} = ((g,h), \commit((g,h),{\vbl}_i; r_{\varbl,i}), \commit((g,h),{\vout}_i; r_{\varout,i}),$ \\ $ \commit((g,h),{\vin}_i; r_{\varin,i}))$
         \item Output $(\{\acct_{\delta,i}\}_{i=1}^n, \{\acct_{\epsilon,i}\}_{i=1}^n, \vec{r_{\varbl}}, \vec{r_{\varout}}, \vec{r_{\varin}})$
     \end{enumerate}
     \vspace{0.3cm}
@@ -83,7 +83,7 @@ Therefore, we need some auxiliary functions for the proof that are defined as fo
 
 Then the $\nizkprove_{\trans}(x,w)$ performs the following steps:
 \begin{enumerate}
-    \item Parse $x=(\inputs, \outputs), w = (\sk, \{{\varbl}_i, {\varout}_i, {\varin}_i\}_{i \in \isset^*}, \vv{\vbl}^\prime, \vv{\vout}^\prime, \vv{\vin}^\prime, \vv{r}, \psi, \isset^*, \irset^*, \ianset^*)$. If $R(x,w) = 0$ abort;
+    \item Parse $x=(\inputs, \outputs), w = (\sk, \{{\varbl}_i, {\varout}_i, {\varin}_i\}_{i \in \isset^*}, \vv{\vbl}^\prime, \vv{\vout}^\prime, \vv{\vin}^\prime, $ \\ $ \vv{r}, \psi, \isset^*, \irset^*, \ianset^*)$. If $R(x,w) = 0$ abort;
     \vspace{0.1cm}
 
     \item Let $\psi_1$ be a permutation such that $\psi_1(\isset^*) = [1,s], \psi_1(\irset^*) = [s+1,t]$ and $\psi_1(\ianset^*) = [t+1, n]$;
@@ -162,7 +162,7 @@ The $\Sigma_2$ protocol that proves $R_2$ consists of the following sub-protocol
      \item $\Sigma^{i}_{zero}$: prover shows knowledge of $r_{\varbl,i}, r_{\varout,i}, r_{\varin,i}$ such that \\ 
      $\verupdacc(\inputs'_i, \outputs'_i, 0,0,0;(1, r_{\varbl,i}, r_{\varout,i}, r_{\varin,i})) = 1$. \\ 
      The sub-argument can be written as follows: \\
-     given $\acct_1 = (\pk, \comm{\vbl}_1, \comm{\vout}_1, \comm{\vin}_1), \acct_2 = (\pk, \comm{\vbl}_2, \comm{\vout}_2, \comm{\vin}_2)$, the prover knows $r_{\varbl}, r_{\varout}, r_{\varin}$ such that $\comm{\vbl}_1 = \comm{\vbl}_2 \cdot \pk^{r_{\varbl}}, \comm{\vout}_1 = \comm{\vout}_2 \cdot \pk^{r_{\varout}}, \comm{\vin}_1 = \comm{\vin}_2 \cdot \pk^{r_{\varin}}$. The equation is equivelant to $\land_{i=\{\varbl, \varout, \varin\}}\verupd(\pk, \frac{com_{2,i}}{com_{1,i}}, r_i) = 1$, hence can be done using AND-proofs of $\Sigma_{vu}$. 
+     given $\acct_1 = (\pk, \comm{\vbl}_1, \comm{\vout}_1, \comm{\vin}_1), \acct_2 = (\pk, \comm{\vbl}_2, \comm{\vout}_2, \comm{\vin}_2)$, the prover knows $r_{\varbl}, r_{\varout}, r_{\varin}$ such that $\comm{\vbl}_1 = \comm{\vbl}_2 \cdot \pk^{r_{\varbl}}, \comm{\vout}_1 = \comm{\vout}_2 \cdot \pk^{r_{\varout}}, \comm{\vin}_1 = \comm{\vin}_2 \cdot \pk^{r_{\varin}}$. \\ The equation is equivelant to $\land_{i=\{\varbl, \varout, \varin\}}\verupd(\pk, \frac{com_{2,i}}{com_{1,i}}, r_i) = 1$, hence can be done using AND-proofs of $\Sigma_{vu}$. 
 
      \item $\Sigma^{i}_{vds}$: prover shows knowledge of $v, r_{\varbl,i}, r_{\varout,i}$ such that $\acct_{\delta,i}$ has the same value under commitments $\comm{\vbl}, \comm{\vout}$.
      $\Sigma^{i}_{vds}$ can be implemented by using $\Sigma_{com}((\pk_{\delta,i}, \comm{\vbl}_i), (\pk_{\delta,i}, \comm{\vout}_i); ({\vbl}_i, r_{\varbl,i}, r_{\varout,i}))$.
@@ -177,7 +177,7 @@ The $\Sigma_2$ protocol that proves $R_2$ consists of the following sub-protocol
      \begin{enumerate}
         \item the prover shows knowledge of $\sk$ using $\Sigma_{dlog}$. 
         \item Since sender may not know the randomness used to open his commitment, the prover opens the commitment with the $\sk$ and finds the value $\varbl$.
-        \item Chooses a new randomness $r \sample \mathbb{F}_p$ and constructs $\acct_{\epsilon} = ((g,h), \commit((g,h),\varbl;r))$.
+        \item Chooses a new randomness $r \sample \mathbb{F}_p$ and constructs $\acct_{\epsilon} = ((g,h),$ \\ $ \commit((g,h),\varbl;r))$.
         \item Proves using $\Sigma_{com}$ that these two accounts has the same $\varbl$.
         \item Proves using $\Sigma_{range}(\acct_{\epsilon}, \varbl, r)$ that $\varbl \in \vset$. 
      \end{enumerate}
